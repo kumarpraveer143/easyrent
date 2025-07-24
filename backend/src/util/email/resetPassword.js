@@ -110,7 +110,7 @@ const sendPasswordResetEmail = async (user, resetPasswordURL) => {
         <div class="content">
             <p>Hello, ${user.name},</p>
             <p>You have requested to reset your password for your Storefleet account. To reset your password, please click the button below:</p>
-            <p><a class="button" href="https://easy-rent-ten.vercel.app/reset/${resetPasswordURL}">Reset Password</a></p>
+            <p><a class="button" href="https://easyrent-red.vercel.app//reset/${resetPasswordURL}">Reset Password</a></p>
             <p>If you did not request a password reset, please ignore this email.</p>
         </div>
         <div class="footer">
