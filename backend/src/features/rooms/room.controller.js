@@ -134,8 +134,15 @@ export default class RoomController {
 
   //get room by status available or not by landlords
   async getAvailableRoom(req, res) {
-    let rooms = await this.roomRepository.availableRoom();
-    return res.status(200).json({ success: true, message: rooms });
+    try {
+      const limit = parseInt(req.query.limit) || 25;
+      const offset = parseInt(req.query.offset) || 0;
+      const rooms = await this.roomRepository.availableRoom(limit, offset);
+      const totalCount = await this.roomRepository.availableRoomCount();
+      res.status(200).json({ message: rooms, totalCount });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to fetch available rooms" });
+    }
   }
 
   async getUnAvailableRoom(req, res) {

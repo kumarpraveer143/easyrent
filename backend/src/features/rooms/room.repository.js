@@ -24,9 +24,10 @@ class RoomRepository {
   }
 
   //get availabe room
-  async availableRoom() {
-    const room = await RoomModel.find({ isAvailable: true });
-    return room;
+  async availableRoom(limit = 25, offset = 0) {
+    return RoomModel.find({ isAvailable: true })
+      .skip(offset)
+      .limit(limit);
   }
 
   //get unAvailable rooms
@@ -55,6 +56,11 @@ class RoomRepository {
   //delete room by id
   async deleteRoom(id) {
     return await RoomModel.findOneAndDelete(id);
+  }
+
+  //get total count of available rooms
+  async availableRoomCount() {
+    return RoomModel.countDocuments({ isAvailable: true });
   }
 }
 export default RoomRepository;

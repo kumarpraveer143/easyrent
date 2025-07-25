@@ -9,4 +9,8 @@ searchRoomRouter.get("/state", (req, res) => {
   searchRoomController.search(req, res);
 });
 
+searchRoomRouter.get("/district-state", (req, res) => {
+  searchRoomController.searchByDistrictAndState(req, res);
+});
+
 export default searchRoomRouter;
