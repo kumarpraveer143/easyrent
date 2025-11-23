@@ -2,45 +2,50 @@ import React from "react";
 
 const Loading = () => {
   return (
-    <div className="flex justify-center items-center w-full h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900">
-      <div className="text-center relative">
-        {/* Animated Background Elements */}
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute top-0 left-0 w-32 h-32 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-          <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse" style={{ animationDelay: '1s' }}></div>
-          <div className="absolute bottom-0 left-1/2 w-32 h-32 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
-        </div>
+    <div className="flex justify-center items-center w-full h-screen bg-gray-50 relative overflow-hidden">
+      {/* Creative Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-indigo-50 opacity-80"></div>
+      <div className="absolute inset-0 opacity-40 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)', backgroundSize: '32px 32px' }}></div>
 
-        {/* Loading Container */}
-        <div className="bg-gray-800 bg-opacity-50 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-gray-700">
-          {/* Loading Text */}
-          <h1 className="text-2xl font-bold text-white mb-6 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-            Loading...
+      {/* Animated Blobs */}
+      <div className="absolute top-0 left-0 w-96 h-96 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-pulse"></div>
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-100 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-pulse" style={{ animationDelay: '2s' }}></div>
+
+      <div className="text-center relative z-10">
+        <div className="bg-white bg-opacity-80 backdrop-blur-xl rounded-3xl p-10 shadow-2xl border border-white/50 transform hover:scale-105 transition-transform duration-500">
+          {/* Logo/Brand Text */}
+          <h1 className="text-3xl font-extrabold text-gray-900 mb-8 tracking-tight">
+            Easy<span className="text-primary-600">Rent</span>
           </h1>
 
-          {/* Enhanced Spinner */}
-          <div className="flex justify-center items-center mb-4">
-            <div className="relative">
+          {/* Enhanced Light Spinner */}
+          <div className="flex justify-center items-center mb-8">
+            <div className="relative w-20 h-20">
               {/* Outer Ring */}
-              <div className="w-16 h-16 border-4 border-gray-600 rounded-full animate-spin"></div>
-              {/* Inner Ring */}
-              <div className="absolute top-0 left-0 w-16 h-16 border-4 border-transparent border-t-blue-500 rounded-full animate-spin" style={{ animationDuration: '1s' }}></div>
-              {/* Center Dot */}
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full animate-pulse"></div>
+              <div className="absolute inset-0 border-4 border-gray-100 rounded-full"></div>
+              {/* Spinning Gradient Ring */}
+              <div className="absolute inset-0 border-4 border-transparent border-t-primary-600 border-r-primary-400 rounded-full animate-spin"></div>
+              {/* Inner Pulse */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-4 h-4 bg-primary-600 rounded-full animate-ping opacity-75"></div>
+              </div>
             </div>
           </div>
 
-          {/* Loading Dots */}
-          <div className="flex justify-center space-x-1">
-            <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-            <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-            <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+          {/* Loading Status */}
+          <div className="space-y-3">
+            <h2 className="text-xl font-bold text-gray-800 animate-pulse">
+              Loading Experience...
+            </h2>
+            <div className="flex justify-center space-x-2">
+              <div className="w-2 h-2 bg-primary-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+              <div className="w-2 h-2 bg-primary-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+              <div className="w-2 h-2 bg-primary-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+            </div>
+            <p className="text-gray-500 text-sm font-medium mt-2">
+              Preparing your perfect home
+            </p>
           </div>
-
-          {/* Subtitle */}
-          <p className="text-gray-400 text-sm mt-4 font-medium">
-            Getting things ready, just a sec!
-          </p>
         </div>
       </div>
     </div>

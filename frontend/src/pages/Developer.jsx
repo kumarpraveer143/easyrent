@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaGithub, FaLinkedin, FaTwitter, FaCode, FaLaptopCode, FaRocket, FaDatabase, FaLinux, FaServer, FaFutbol, FaPlane } from "react-icons/fa";
+import { FaGithub, FaLinkedin, FaTwitter, FaInstagram, FaCode, FaLaptopCode, FaRocket, FaDatabase, FaLinux, FaServer, FaFutbol, FaPlane } from "react-icons/fa";
 import { SiCplusplus } from "react-icons/si";
 
 const Developer = () => {
@@ -10,38 +10,38 @@ const Developer = () => {
   }, []);
 
   return (
-    <div className="font-sans bg-gray-900 text-white min-h-screen overflow-x-hidden">
+    <div className="font-sans bg-gray-50 text-gray-900 min-h-screen overflow-x-hidden">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900 py-20 overflow-hidden">
-        <div className="absolute inset-0 bg-black opacity-20"></div>
+      <section className="relative bg-white py-20 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-50 opacity-70"></div>
         <div className="absolute inset-0">
-          <div className="absolute top-0 left-0 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-          <div className="absolute top-0 right-0 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
-          <div className="absolute bottom-0 left-1/2 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse" style={{ animationDelay: '4s' }}></div>
+          <div className="absolute top-0 left-0 w-96 h-96 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" style={{ animationDelay: '2s' }}></div>
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row items-center gap-12">
             {/* Image Section */}
-            <div className="lg:w-1/2 w-full">
-              <div className="w-full flex items-center justify-center">
+            <div className={`lg:w-1/2 w-full transition-all duration-1000 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`}>
+              <div className="w-full flex items-center justify-center relative">
+                <div className="absolute inset-0 bg-gradient-to-tr from-blue-600 to-purple-600 rounded-2xl transform rotate-6 scale-105 opacity-20 blur-lg"></div>
                 <img
-                  src="images/myPhoto3.jpg"
-                  alt="Developer"
-                  className="rounded-2xl shadow-2xl w-80 h-96 object-cover drop-shadow-2xl"
+                  src="images/praveer.jpg"
+                  alt="Praveer Kumar"
+                  className="relative rounded-2xl shadow-2xl w-80 h-96 object-cover z-10 transform hover:scale-105 transition-transform duration-500"
                 />
               </div>
             </div>
 
             {/* Text and Social Section */}
-            <div className={`lg:w-1/2 w-full text-center lg:text-left transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'}`}>
-              <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4">
+            <div className={`lg:w-1/2 w-full text-center lg:text-left transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'}`}>
+              <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 mb-4 tracking-tight">
                 Praveer Kumar
               </h1>
-              <p className="text-2xl md:text-3xl leading-8 font-extrabold tracking-tight bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-6">
+              <p className="text-2xl md:text-3xl leading-8 font-extrabold tracking-tight text-primary-600 mb-6">
                 Full-Stack Developer
               </p>
-              <p className="text-xl text-gray-300 mb-8 leading-relaxed max-w-2xl">
+              <p className="text-xl text-gray-600 mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0">
                 Hi, I'm a passionate developer currently pursuing MCA at NIT Bhopal.
                 I am dedicated to building intuitive applications and solving
                 real-world problems with innovative solutions. Let's connect and
@@ -49,35 +49,21 @@ const Developer = () => {
               </p>
 
               {/* Skills/Interests */}
-              <div className="flex flex-wrap justify-center lg:justify-start gap-4 mb-8">
-                <div className="flex items-center bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-full px-4 py-2 border border-gray-700 hover:border-blue-500 transition-all duration-300 group">
-                  <FaCode className="text-blue-400 mr-2 group-hover:scale-110 transition-transform duration-300" />
-                  <span className="text-gray-300 group-hover:text-white transition-colors duration-300">Web Development</span>
-                </div>
-                <div className="flex items-center bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-full px-4 py-2 border border-gray-700 hover:border-purple-500 transition-all duration-300 group">
-                  <FaLaptopCode className="text-purple-400 mr-2 group-hover:scale-110 transition-transform duration-300" />
-                  <span className="text-gray-300 group-hover:text-white transition-colors duration-300">Full-Stack</span>
-                </div>
-                <div className="flex items-center bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-full px-4 py-2 border border-gray-700 hover:border-green-500 transition-all duration-300 group">
-                  <FaServer className="text-green-400 mr-2 group-hover:scale-110 transition-transform duration-300" />
-                  <span className="text-gray-300 group-hover:text-white transition-colors duration-300">Backend</span>
-                </div>
-                <div className="flex items-center bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-full px-4 py-2 border border-gray-700 hover:border-orange-500 transition-all duration-300 group">
-                  <FaDatabase className="text-orange-400 mr-2 group-hover:scale-110 transition-transform duration-300" />
-                  <span className="text-gray-300 group-hover:text-white transition-colors duration-300">Big Data</span>
-                </div>
-                <div className="flex items-center bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-full px-4 py-2 border border-gray-700 hover:border-yellow-500 transition-all duration-300 group">
-                  <FaLinux className="text-yellow-400 mr-2 group-hover:scale-110 transition-transform duration-300" />
-                  <span className="text-gray-300 group-hover:text-white transition-colors duration-300">Linux</span>
-                </div>
-                <div className="flex items-center bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-full px-4 py-2 border border-gray-700 hover:border-red-500 transition-all duration-300 group">
-                  <SiCplusplus className="text-red-400 mr-2 group-hover:scale-110 transition-transform duration-300" />
-                  <span className="text-gray-300 group-hover:text-white transition-colors duration-300">C++</span>
-                </div>
-                <div className="flex items-center bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-full px-4 py-2 border border-gray-700 hover:border-pink-500 transition-all duration-300 group">
-                  <FaRocket className="text-pink-400 mr-2 group-hover:scale-110 transition-transform duration-300" />
-                  <span className="text-gray-300 group-hover:text-white transition-colors duration-300">Innovation</span>
-                </div>
+              <div className="flex flex-wrap justify-center lg:justify-start gap-3 mb-10">
+                {[
+                  { icon: FaCode, text: "Web Dev", color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-100" },
+                  { icon: FaLaptopCode, text: "Full-Stack", color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-100" },
+                  { icon: FaServer, text: "Backend", color: "text-green-600", bg: "bg-green-50", border: "border-green-100" },
+                  { icon: FaDatabase, text: "Big Data", color: "text-orange-600", bg: "bg-orange-50", border: "border-orange-100" },
+                  { icon: FaLinux, text: "Linux", color: "text-yellow-600", bg: "bg-yellow-50", border: "border-yellow-100" },
+                  { icon: SiCplusplus, text: "C++", color: "text-red-600", bg: "bg-red-50", border: "border-red-100" },
+                  { icon: FaRocket, text: "Innovation", color: "text-pink-600", bg: "bg-pink-50", border: "border-pink-100" },
+                ].map((skill, index) => (
+                  <div key={index} className={`flex items-center ${skill.bg} rounded-full px-4 py-2 border ${skill.border} hover:shadow-md transition-all duration-300 transform hover:-translate-y-1`}>
+                    <skill.icon className={`${skill.color} mr-2`} />
+                    <span className="text-gray-700 font-medium text-sm">{skill.text}</span>
+                  </div>
+                ))}
               </div>
 
               {/* Social Links */}
@@ -86,25 +72,33 @@ const Developer = () => {
                   href="https://github.com/kumarpraveer143"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group relative inline-flex items-center justify-center w-14 h-14 bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-full border border-gray-700 hover:border-gray-500 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-gray-500/25"
+                  className="group relative inline-flex items-center justify-center w-12 h-12 bg-white rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100"
                 >
-                  <FaGithub size={24} className="text-gray-300 group-hover:text-white transition-colors duration-300" />
+                  <FaGithub size={24} className="text-gray-700 group-hover:text-black transition-colors duration-300" />
                 </a>
                 <a
                   href="https://www.linkedin.com/in/praveerdeveloper/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group relative inline-flex items-center justify-center w-14 h-14 bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-full border border-gray-700 hover:border-blue-500 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-blue-500/25"
+                  className="group relative inline-flex items-center justify-center w-12 h-12 bg-white rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100"
                 >
-                  <FaLinkedin size={24} className="text-blue-400 group-hover:text-blue-300 transition-colors duration-300" />
+                  <FaLinkedin size={24} className="text-gray-700 group-hover:text-blue-600 transition-colors duration-300" />
                 </a>
                 <a
                   href="https://x.com/kumarpraveer3?t=s-r4AAAheb9JaG9UBN70og&s=09"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group relative inline-flex items-center justify-center w-14 h-14 bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-full border border-gray-700 hover:border-blue-400 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-blue-400/25"
+                  className="group relative inline-flex items-center justify-center w-12 h-12 bg-white rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100"
                 >
-                  <FaTwitter size={24} className="text-blue-400 group-hover:text-blue-300 transition-colors duration-300" />
+                  <FaTwitter size={24} className="text-gray-700 group-hover:text-blue-400 transition-colors duration-300" />
+                </a>
+                <a
+                  href="https://www.instagram.com/kumar_praveeer?igsh=a3ZxamN0aWFqcjQw"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative inline-flex items-center justify-center w-12 h-12 bg-white rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100"
+                >
+                  <FaInstagram size={24} className="text-gray-700 group-hover:text-pink-600 transition-colors duration-300" />
                 </a>
               </div>
             </div>
@@ -113,67 +107,37 @@ const Developer = () => {
       </section>
 
       {/* Additional Info Section */}
-      <section className="py-20 bg-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-20 bg-gray-50 relative">
+        <div className="absolute inset-0 opacity-40 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)', backgroundSize: '32px 32px' }}></div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-extrabold text-white sm:text-5xl mb-4">
+            <h2 className="text-4xl font-extrabold text-gray-900 sm:text-5xl mb-4">
               What I Do
             </h2>
-            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Passionate about creating innovative solutions, building applications, and enjoying life through sports and travel.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-gray-700 bg-opacity-50 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-gray-600 hover:border-blue-500 transition-all duration-300 group hover:scale-105">
-              <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
-                <FaCode size={32} className="text-white" />
+            {[
+              { icon: FaCode, title: "Web Development", desc: "Building modern, responsive web applications using cutting-edge technologies and best practices.", color: "text-blue-600", bg: "bg-blue-50" },
+              { icon: FaLaptopCode, title: "Full-Stack Solutions", desc: "End-to-end development from database design to user interface, ensuring seamless integration.", color: "text-purple-600", bg: "bg-purple-50" },
+              { icon: FaFutbol, title: "Football", desc: "Passionate about football, both playing and watching. It keeps me active and teaches teamwork and strategy.", color: "text-green-600", bg: "bg-green-50" },
+              { icon: FaPlane, title: "Travel", desc: "Love exploring new places and cultures. Traveling broadens perspectives and inspires creativity in my work.", color: "text-cyan-600", bg: "bg-cyan-50" },
+              { icon: FaRocket, title: "Innovation", desc: "Constantly exploring new technologies and approaches to solve complex problems creatively.", color: "text-pink-600", bg: "bg-pink-50" },
+            ].map((item, index) => (
+              <div key={index} className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 group">
+                <div className={`flex items-center justify-center w-16 h-16 ${item.bg} rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                  <item.icon size={32} className={item.color} />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">{item.title}</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  {item.desc}
+                </p>
               </div>
-              <h3 className="text-2xl font-bold text-white mb-4">Web Development</h3>
-              <p className="text-gray-300 leading-relaxed">
-                Building modern, responsive web applications using cutting-edge technologies and best practices.
-              </p>
-            </div>
-
-            <div className="bg-gray-700 bg-opacity-50 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-gray-600 hover:border-purple-500 transition-all duration-300 group hover:scale-105">
-              <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
-                <FaLaptopCode size={32} className="text-white" />
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-4">Full-Stack Solutions</h3>
-              <p className="text-gray-300 leading-relaxed">
-                End-to-end development from database design to user interface, ensuring seamless integration.
-              </p>
-            </div>
-
-            <div className="bg-gray-700 bg-opacity-50 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-gray-600 hover:border-green-500 transition-all duration-300 group hover:scale-105">
-              <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-500 to-teal-500 rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
-                <FaFutbol size={32} className="text-white" />
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-4">Football</h3>
-              <p className="text-gray-300 leading-relaxed">
-                Passionate about football, both playing and watching. It keeps me active and teaches teamwork and strategy.
-              </p>
-            </div>
-
-            <div className="bg-gray-700 bg-opacity-50 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-gray-600 hover:border-cyan-500 transition-all duration-300 group hover:scale-105">
-              <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
-                <FaPlane size={32} className="text-white" />
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-4">Travel</h3>
-              <p className="text-gray-300 leading-relaxed">
-                Love exploring new places and cultures. Traveling broadens perspectives and inspires creativity in my work.
-              </p>
-            </div>
-
-            <div className="bg-gray-700 bg-opacity-50 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-gray-600 hover:border-pink-500 transition-all duration-300 group hover:scale-105">
-              <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-pink-500 to-red-500 rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
-                <FaRocket size={32} className="text-white" />
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-4">Innovation</h3>
-              <p className="text-gray-300 leading-relaxed">
-                Constantly exploring new technologies and approaches to solve complex problems creatively.
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </section>

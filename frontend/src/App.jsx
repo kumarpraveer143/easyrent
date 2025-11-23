@@ -131,7 +131,27 @@ const App = () => {
           </Route>
         </Routes>
       </Suspense>
-      <ToastContainer />
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={true}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        style={{
+          marginTop: '70px', // Add margin to avoid navbar overlap
+        }}
+        toastStyle={{
+          borderRadius: '12px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+          fontFamily: 'Inter, system-ui, sans-serif',
+          fontSize: '14px',
+        }}
+      />
     </BrowserRouter>
   );
 };

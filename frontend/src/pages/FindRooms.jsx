@@ -39,14 +39,12 @@ const FindRooms = () => {
       });
       const newRooms = response.data.message;
       setRooms(newRooms);
-      setFilteredRooms(newRooms); // <-- Add this line
-      // If backend provides total count, use it. Otherwise, estimate.
+      setFilteredRooms(newRooms);
       const total = response.data.totalCount || (response.data.total || 0);
       if (total) {
         setTotalRooms(total);
         setTotalPages(Math.ceil(total / limit));
       } else {
-        // Fallback: if no total, estimate pages by response length
         setTotalRooms((pageNum - 1) * limit + newRooms.length);
         setTotalPages(newRooms.length < limit ? pageNum : pageNum + 1);
       }
@@ -87,14 +85,11 @@ const FindRooms = () => {
 
   useEffect(() => {
     if (!searchState) {
-      // If no state selected, show all districts
       const allDistricts = districtData.states.flatMap((s) => s.districts);
       setDistricts(allDistricts);
     } else {
-      // Find the selected state and set its districts
       const found = districtData.states.find((s) => s.state === searchState);
       setDistricts(found ? found.districts : []);
-      // If the selected district is not in the new list, clear it
       if (searchDistrict && !(found && found.districts.includes(searchDistrict))) {
         setSearchDistrict("");
       }
@@ -179,26 +174,22 @@ const FindRooms = () => {
 
   const user = JSON.parse(localStorage.getItem("user"));
 
-  // console.log("Rooms to render:", rooms);
-
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-gray-50 text-gray-900">
       {/* Header Section */}
-      <div className="bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900 py-12 relative overflow-hidden pt-24">
-        <div className="absolute inset-0 bg-black opacity-20"></div>
+      <div className="bg-white py-16 relative overflow-hidden border-b border-gray-100">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-50 opacity-50"></div>
         <div className="absolute inset-0">
-          <div className="absolute top-0 left-0 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-          <div className="absolute top-0 right-0 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
+          <div className="absolute top-0 left-0 w-96 h-96 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" style={{ animationDelay: '2s' }}></div>
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl mb-4">
-              <span className="block bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                Find Your Perfect Room
-              </span>
+            <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-6xl mb-4">
+              Find Your Perfect Room
             </h1>
-            <p className="mt-4 max-w-2xl text-lg text-gray-300 sm:text-xl mx-auto">
+            <p className="mt-4 max-w-2xl text-lg text-gray-600 sm:text-xl mx-auto">
               Browse through our collection of available rooms and find your ideal living space
             </p>
           </div>
@@ -224,12 +215,12 @@ const FindRooms = () => {
             <SearchNoFound />
           </div>
         ) : rooms.length > 0 ? (
-          <div className="mt-8">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-              <h3 className="text-2xl font-bold text-white mb-2 sm:mb-0">
+          <div className="mt-12">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2 sm:mb-0">
                 Available Rooms ({totalRooms})
               </h3>
-              <div className="text-gray-300 text-sm">
+              <div className="text-gray-600 text-sm">
                 Showing {rooms.length} of {totalRooms}
               </div>
             </div>
@@ -238,7 +229,7 @@ const FindRooms = () => {
               {filteredRooms.map((room) => (
                 <div
                   key={room._id}
-                  className="group bg-gray-800 rounded-2xl shadow-2xl overflow-hidden border border-gray-700 hover:border-blue-500 transition-all duration-500 transform hover:-translate-y-2"
+                  className="group bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100 hover:border-primary-300 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
                 >
                   <div className="relative">
                     <img
@@ -246,45 +237,45 @@ const FindRooms = () => {
                       alt="Room"
                       className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                     />
-                    <div className="absolute top-0 right-0 bg-gradient-to-l from-blue-600 to-purple-600 text-white px-3 py-1 rounded-bl-lg font-medium text-sm">
-                      ₹{room.rentPrice}/month
+                    <div className="absolute top-0 right-0 bg-primary-600 text-white px-3 py-1 rounded-bl-xl font-bold text-sm shadow-md">
+                      ₹{room.rentPrice}/mo
                     </div>
-                    <div className="absolute top-0 left-0 bg-green-500 text-white px-3 py-1 rounded-br-lg font-medium text-sm">
+                    <div className="absolute top-0 left-0 bg-green-500 text-white px-3 py-1 rounded-br-xl font-medium text-sm shadow-md">
                       Available
                     </div>
                   </div>
 
                   <div className="p-5 space-y-4">
                     <div>
-                      <h3 className="text-xl font-bold text-white mb-2 capitalize">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2 capitalize">
                         {room.roomType} Room
                       </h3>
-                      <div className="flex items-center space-x-2 text-gray-300 text-sm">
-                        <FaMapMarkerAlt className="h-4 w-4 text-blue-400 flex-shrink-0" />
+                      <div className="flex items-center space-x-2 text-gray-600 text-sm">
+                        <FaMapMarkerAlt className="h-4 w-4 text-primary-500 flex-shrink-0" />
                         <span className="truncate">{room.address.city}, {room.address.state}</span>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
                       <div className="flex items-center space-x-2">
-                        <FaBed className="h-4 w-4 text-blue-400 flex-shrink-0" />
-                        <span className="text-gray-300 text-sm">{room.numberOfRooms} Rooms</span>
+                        <FaBed className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                        <span className="text-gray-700 text-sm font-medium">{room.numberOfRooms} Rooms</span>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <FaBath className="h-4 w-4 text-cyan-400 flex-shrink-0" />
-                        <span className="text-gray-300 text-sm">{room.numberOfBathrooms} Bath</span>
+                        <FaBath className="h-4 w-4 text-cyan-500 flex-shrink-0" />
+                        <span className="text-gray-700 text-sm font-medium">{room.numberOfBathrooms} Bath</span>
                       </div>
                     </div>
 
-                    <div className="flex items-center space-x-2">
-                      <FaMoneyBillWave className="h-4 w-4 text-green-400 flex-shrink-0" />
-                      <span className="text-green-400 font-semibold">₹{room.rentPrice}/month</span>
+                    <div className="flex items-center space-x-2 pt-2 border-t border-gray-100">
+                      <FaMoneyBillWave className="h-4 w-4 text-green-500 flex-shrink-0" />
+                      <span className="text-green-600 font-bold text-lg">₹{room.rentPrice}/month</span>
                     </div>
 
                     {user ? (
                       <button
                         onClick={() => handleViewRoom(room._id)}
-                        className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white py-3 px-4 rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-300 flex items-center justify-center space-x-2 group"
+                        className="w-full bg-gray-900 text-white py-3 px-4 rounded-xl hover:bg-gray-800 transition-all duration-300 flex items-center justify-center space-x-2 group font-bold shadow-md"
                       >
                         <span>View Details</span>
                         <FaArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
@@ -292,7 +283,7 @@ const FindRooms = () => {
                     ) : (
                       <button
                         onClick={() => navigate("/login")}
-                        className="w-full bg-gradient-to-r from-gray-600 to-gray-700 text-white py-3 px-4 rounded-lg hover:from-gray-700 hover:to-gray-800 transition-all duration-300 flex items-center justify-center space-x-2 group"
+                        className="w-full bg-white text-gray-700 border-2 border-gray-300 py-3 px-4 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 flex items-center justify-center space-x-2 group font-bold"
                       >
                         <span>Login to View Room</span>
                         <FaArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
@@ -302,13 +293,14 @@ const FindRooms = () => {
                 </div>
               ))}
             </div>
+
             {/* Pagination Controls */}
             {totalPages > 1 && (
-              <div className="mt-10 flex justify-center items-center space-x-2">
+              <div className="mt-12 flex justify-center items-center space-x-2">
                 <button
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className={`px-4 py-2 rounded-lg font-bold transition-all duration-300 ${currentPage === 1 ? 'bg-gray-700 text-gray-400 cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
+                  className={`px-5 py-2 rounded-xl font-bold transition-all duration-300 ${currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 border-2 border-gray-300 hover:bg-gray-50 shadow-sm'}`}
                 >
                   Previous
                 </button>
@@ -316,7 +308,7 @@ const FindRooms = () => {
                   <button
                     key={num}
                     onClick={() => handlePageChange(num)}
-                    className={`px-3 py-2 rounded-lg font-bold transition-all duration-300 ${currentPage === num ? 'bg-purple-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-blue-500 hover:text-white'}`}
+                    className={`px-4 py-2 rounded-xl font-bold transition-all duration-300 ${currentPage === num ? 'bg-primary-600 text-white shadow-md' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'}`}
                   >
                     {num}
                   </button>
@@ -324,7 +316,7 @@ const FindRooms = () => {
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className={`px-4 py-2 rounded-lg font-bold transition-all duration-300 ${currentPage === totalPages ? 'bg-gray-700 text-gray-400 cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
+                  className={`px-5 py-2 rounded-xl font-bold transition-all duration-300 ${currentPage === totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 border-2 border-gray-300 hover:bg-gray-50 shadow-sm'}`}
                 >
                   Next
                 </button>
