@@ -1,0 +1,53 @@
+import { io } from "socket.io-client";
+
+let socket = null;
+
+const SOCKET_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3000';
+
+export const connectSocket = (userId) => {
+    if (!socket) {
+        socket = io(SOCKET_URL, {
+            withCredentials: true,
+            transports: ['websocket', 'polling'],
+        });
+
+        socket.on('connect', () => {
+            console.log('Socket connected:', socket.id);
+            // Register user with their userId
+            if (userId) {
+                socket.emit('register', userId);
+            }
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Socket disconnected');
+        });
+
+        socket.on('error', (error) => {
+            console.error('Socket error:', error);
+        });
+    }
+
+    return socket;
+};
+
+export const disconnectSocket = () => {
+    if (socket) {
+        socket.disconnect();
+        socket = null;
+    }
+};
+
+export const onNotification = (callback) => {
+    if (socket) {
+        socket.on('notification', callback);
+    }
+};
+
+export const offNotification = () => {
+    if (socket) {
+        socket.off('notification');
+    }
+};
+
+export const getSocket = () => socket;

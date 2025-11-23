@@ -1,8 +1,11 @@
 import RequestRepository from "./request.respository.js";
+import NotificationRepository from "../notification/notification.repository.js";
+import { emitToUser } from "../../config/socket.config.js";
 
 class RequestController {
   constructor() {
     this.requestRespoitory = new RequestRepository();
+    this.notificationRepository = new NotificationRepository();
   }
   async toggleRequest(req, res) {
     const userId = req.userId;
@@ -12,6 +15,32 @@ class RequestController {
         userId,
         roomId
       );
+
+      // If a new request was created (not deleted), send notification to landowner
+      if (switchRequest && !switchRequest.deletedAt) {
+        // Get room details to find owner
+        const roomDetails = await this.requestRespoitory.getRoomDetails(roomId);
+        if (roomDetails) {
+          // Create notification in database
+          const notification = await this.notificationRepository.createNotification({
+            userId: roomDetails.ownerId,
+            type: 'request_received',
+            message: `New rental request for Room ${roomDetails.roomNumber || 'N/A'}`,
+            roomId: roomId,
+            roomNumber: roomDetails.roomNumber || 'N/A',
+          });
+
+          // Emit real-time notification via socket
+          emitToUser(roomDetails.ownerId.toString(), 'notification', {
+            type: 'request_received',
+            message: notification.message,
+            roomId: roomId,
+            roomNumber: roomDetails.roomNumber || 'N/A',
+            createdAt: notification.createdAt,
+          });
+        }
+      }
+
       return res.status(200).json({ success: true, request: switchRequest });
     } catch (err) {
       return res.status(500).json({

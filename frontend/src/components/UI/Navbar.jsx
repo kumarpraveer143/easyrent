@@ -1,24 +1,66 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { FaUserCircle } from "react-icons/fa";
+import { FaUserCircle, FaBell } from "react-icons/fa";
 import Loading from "./Loading";
 import axios from "axios";
+import { connectSocket, disconnectSocket, onNotification, offNotification } from "../../services/socket.service";
+import { toast } from "react-toastify";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
 
   const user = localStorage.getItem("user");
+  const userId = user ? JSON.parse(user)?.userId : null;
+
+  // Fetch unread notification count
+  const fetchUnreadCount = async () => {
+    if (userId) {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/notifications/unread`, {
+          withCredentials: true,
+        });
+        setUnreadCount(response.data.count || 0);
+      } catch (error) {
+        console.error("Error fetching unread count:", error);
+      }
+    }
+  };
+
+  // Setup socket and notifications
+  useEffect(() => {
+    if (userId) {
+      connectSocket(userId);
+
+      // Listen for notifications
+      onNotification((data) => {
+        console.log("Notification received:", data);
+        toast.info(data.message, {
+          position: "top-right",
+          autoClose: 5000,
+        });
+        fetchUnreadCount();
+      });
+
+      // Fetch initial unread count
+      fetchUnreadCount();
+
+      return () => {
+        offNotification();
+        disconnectSocket();
+      };
+    }
+  }, [userId]);
 
   const handleNavigation = (path) => {
-    if (location.pathname === path) return; // Don't navigate if already on the same page
+    if (location.pathname === path) return;
 
     setIsLoading(true);
     setIsMenuOpen(false);
 
-    // Simulate a small delay to show loading (you can adjust this)
     setTimeout(() => {
       navigate(path);
       setIsLoading(false);
@@ -33,6 +75,7 @@ const Navbar = () => {
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
+      disconnectSocket();
       localStorage.removeItem("user");
       localStorage.removeItem("favouriteRooms");
       navigate("/login");
@@ -83,7 +126,18 @@ const Navbar = () => {
         <div className="hidden md:flex items-center space-x-4">
           {user ? (
             <>
-              {/* Dashboard Button Only */}
+              {/* Notification Bell */}
+              <div className="relative">
+                <button className="relative p-2 text-gray-600 hover:text-primary-600 transition-colors duration-300">
+                  <FaBell className="h-6 w-6" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </button>
+              </div>
+
               <button
                 onClick={() => handleNavigation("/dashboard")}
                 className="px-6 py-2 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5"

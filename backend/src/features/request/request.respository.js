@@ -49,5 +49,16 @@ class RequestRepository {
     const user = await requestModel.find({ roomId }).populate("renterId");
     return user;
   }
+
+  async getRoomDetails(roomId) {
+    try {
+      const RoomModel = mongoose.model("Room");
+      const room = await RoomModel.findById(roomId);
+      return room;
+    } catch (error) {
+      console.log("Error fetching room details:", error);
+      return null;
+    }
+  }
 }
 export default RequestRepository;

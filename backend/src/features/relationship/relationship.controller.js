@@ -1,10 +1,13 @@
 import RequestRepository from "../request/request.respository.js";
 import RelationshipSchma from "./relationship.repository.js";
+import NotificationRepository from "../notification/notification.repository.js";
+import { emitToUser } from "../../config/socket.config.js";
 
 class RelationshipController {
   constructor() {
     this.relaltionshipRepository = new RelationshipSchma();
     this.requestRepository = new RequestRepository();
+    this.notificationRepository = new NotificationRepository();
   }
 
   async accept(req, res) {
@@ -17,6 +20,29 @@ class RelationshipController {
         roomId,
         renterId,
       });
+
+      // Get room details for notification
+      const roomDetails = await this.requestRepository.getRoomDetails(roomId);
+      if (roomDetails) {
+        // Create notification in database
+        const notification = await this.notificationRepository.createNotification({
+          userId: renterId,
+          type: 'request_accepted',
+          message: `Your request for Room ${roomDetails.roomNumber || 'N/A'} was accepted`,
+          roomId: roomId,
+          roomNumber: roomDetails.roomNumber || 'N/A',
+        });
+
+        // Emit real-time notification via socket
+        emitToUser(renterId.toString(), 'notification', {
+          type: 'request_accepted',
+          message: notification.message,
+          roomId: roomId,
+          roomNumber: roomDetails.roomNumber || 'N/A',
+          createdAt: notification.createdAt,
+        });
+      }
+
       return res
         .status(200)
         .json({ success: true, message: "Added to your room" });
@@ -36,6 +62,29 @@ class RelationshipController {
         renterId,
         roomId
       );
+
+      // Get room details for notification
+      const roomDetails = await this.requestRepository.getRoomDetails(roomId);
+      if (roomDetails) {
+        // Create notification in database
+        const notification = await this.notificationRepository.createNotification({
+          userId: renterId,
+          type: 'request_rejected',
+          message: `Your request for Room ${roomDetails.roomNumber || 'N/A'} was rejected`,
+          roomId: roomId,
+          roomNumber: roomDetails.roomNumber || 'N/A',
+        });
+
+        // Emit real-time notification via socket
+        emitToUser(renterId.toString(), 'notification', {
+          type: 'request_rejected',
+          message: notification.message,
+          roomId: roomId,
+          roomNumber: roomDetails.roomNumber || 'N/A',
+          createdAt: notification.createdAt,
+        });
+      }
+
       return res.status(200).json({ success: true, message: rejectedReq });
     } catch (err) {
       console.log(err);
