@@ -60,7 +60,6 @@ const UploadRooms = () => {
     numberOfRooms: "",
     numberOfBathrooms: "",
     roomNumber: "",
-    // photos: [],
     isAvailable: true,
   });
 
@@ -94,29 +93,16 @@ const UploadRooms = () => {
     }
   };
 
-  // const handleFileUpload = (e) => {
-  //   const files = Array.from(e.target.files);
-  //   if (files.length > 6) {
-  //     alert("You can only upload up to 6 images.");
-  //     return;
-  //   }
-  //   setFormData((prevData) => ({
-  //     ...prevData,
-  //     // photos: files,
-  //   }));
-  // };
-
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent the default form submission
+    e.preventDefault();
     try {
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/rooms/`, formData, {
         withCredentials: true,
       });
-      // console.log("Response:", response.data); // Handle the response
       toast.success("Room Registered Successfully");
       navigate("/dashboard");
     } catch (err) {
-      console.error("Something went wrong:", err.message); // Log detailed error
+      console.error("Something went wrong:", err.message);
       toast.error("Something went wrong");
     }
   };
@@ -125,44 +111,46 @@ const UploadRooms = () => {
   const houseName = user?.houseName;
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-gray-50 text-gray-900">
       {/* Header Section */}
-      <div className="bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900 py-12 relative overflow-hidden pt-24">
-        <div className="absolute inset-0 bg-black opacity-20"></div>
+      <div className="bg-white py-16 relative overflow-hidden border-b border-gray-100">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-50 opacity-50"></div>
         <div className="absolute inset-0">
-          <div className="absolute top-0 left-0 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-          <div className="absolute top-0 right-0 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse" style={{animationDelay: '2s'}}></div>
+          <div className="absolute top-0 left-0 w-96 h-96 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" style={{ animationDelay: '2s' }}></div>
         </div>
-        
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <div className="flex items-center justify-center mb-6">
-              <button
-                onClick={() => navigate("/dashboard")}
-                className="mr-4 p-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors duration-300 group"
-              >
-                <FaArrowLeft className="h-5 w-5 text-blue-400 group-hover:scale-110 transition-transform duration-300" />
-              </button>
-              <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl">
-                <span className="block bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                  Upload Room Details
-                </span>
+          <div className="flex items-center justify-between mb-6">
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="flex items-center space-x-2 bg-white border-2 border-gray-200 hover:bg-gray-50 hover:border-gray-300 text-gray-700 px-4 py-2 rounded-xl transition-all duration-300 group font-medium shadow-sm"
+            >
+              <FaArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform duration-300" />
+              <span>Back</span>
+            </button>
+
+            <div className="absolute left-1/2 transform -translate-x-1/2 text-center">
+              <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl mb-2">
+                Upload Room Details
               </h1>
+              <p className="text-gray-600 text-lg">
+                Add your property to our platform
+              </p>
             </div>
-            <p className="mt-4 max-w-2xl text-lg text-gray-300 sm:text-xl mx-auto">
-              Add your property to our platform and connect with potential tenants
-            </p>
+
+            <div className="w-20"></div>
           </div>
         </div>
       </div>
 
       {/* Form Section */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
           {/* Form Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6">
+          <div className="bg-gradient-to-r from-primary-600 to-indigo-600 p-6">
             <div className="flex items-center space-x-3">
-              <div className="h-12 w-12 rounded-xl bg-white bg-opacity-20 flex items-center justify-center">
+              <div className="h-12 w-12 rounded-xl bg-white bg-opacity-20 flex items-center justify-center backdrop-blur-sm">
                 <FaHome className="h-6 w-6 text-white" />
               </div>
               <div>
@@ -173,23 +161,23 @@ const UploadRooms = () => {
           </div>
 
           {/* Form Content */}
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          <form onSubmit={handleSubmit} className="p-6 space-y-8">
             {/* Address Section */}
             <div className="space-y-6">
               <div className="flex items-center space-x-3 mb-4">
-                <FaMapMarkerAlt className="h-6 w-6 text-blue-400" />
-                <h3 className="text-xl font-semibold text-white">Property Address</h3>
+                <FaMapMarkerAlt className="h-6 w-6 text-blue-600" />
+                <h3 className="text-xl font-bold text-gray-900">Property Address</h3>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Street Address</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Street Address</label>
                   <input
                     type="text"
                     name="address.street"
                     value={formData.address.street}
                     onChange={handleInputChange}
-                    className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none transition-colors duration-300"
+                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-300 hover:bg-white"
                     placeholder="Enter street address"
                   />
                 </div>
@@ -197,7 +185,7 @@ const UploadRooms = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">State</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">State</label>
                   <select
                     name="address.state"
                     value={formData.address.state}
@@ -205,7 +193,7 @@ const UploadRooms = () => {
                       handleInputChange(e);
                       handleStateChange(e);
                     }}
-                    className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:outline-none transition-colors duration-300"
+                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-300 hover:bg-white"
                   >
                     <option value="" disabled>Select a state</option>
                     {indianStates.map((state) => (
@@ -215,12 +203,12 @@ const UploadRooms = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">District</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">District</label>
                   <select
                     name="address.city"
                     value={formData.address.city}
                     onChange={handleInputChange}
-                    className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:outline-none transition-colors duration-300"
+                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-300 hover:bg-white"
                   >
                     <option value="" disabled>Select a district</option>
                     {availableDistricts.map((district, index) => (
@@ -230,15 +218,15 @@ const UploadRooms = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Zip Code</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Zip Code</label>
                   <input
                     type="text"
                     name="address.zipCode"
                     value={formData.address.zipCode}
                     onChange={handleInputChange}
-                    className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none transition-colors duration-300"
+                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-300 hover:bg-white"
                     placeholder="Enter zip code"
                   />
                 </div>
@@ -246,35 +234,35 @@ const UploadRooms = () => {
             </div>
 
             {/* Property Details Section */}
-            <div className="space-y-6">
+            <div className="space-y-6 pt-6 border-t border-gray-100">
               <div className="flex items-center space-x-3 mb-4">
-                <FaBuilding className="h-6 w-6 text-purple-400" />
-                <h3 className="text-xl font-semibold text-white">Property Details</h3>
+                <FaBuilding className="h-6 w-6 text-purple-600" />
+                <h3 className="text-xl font-bold text-gray-900">Property Details</h3>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Rent Price (₹)</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Rent Price (₹)</label>
                   <div className="relative">
-                    <FaMoneyBillWave className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-400" />
+                    <FaMoneyBillWave className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-500" />
                     <input
                       type="number"
                       name="rentPrice"
                       value={formData.rentPrice}
                       onChange={handleInputChange}
-                      className="w-full p-3 pl-10 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none transition-colors duration-300"
+                      className="w-full p-3 pl-10 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-300 hover:bg-white"
                       placeholder="Enter rent amount"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Room Type</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Room Type</label>
                   <select
                     name="roomType"
                     value={formData.roomType}
                     onChange={handleInputChange}
-                    className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:outline-none transition-colors duration-300"
+                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-300 hover:bg-white"
                   >
                     <option value="" disabled>Select room type</option>
                     <option value="single">Single</option>
@@ -288,47 +276,47 @@ const UploadRooms = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Room Number <span className="text-gray-500">(Optional)</span>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    Room Number <span className="text-gray-400 font-normal">(Optional)</span>
                   </label>
                   <div className="relative">
-                    <FaHashtag className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-blue-400" />
+                    <FaHashtag className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-blue-500" />
                     <input
                       type="text"
                       name="roomNumber"
                       value={formData.roomNumber}
                       onChange={handleInputChange}
-                      className="w-full p-3 pl-10 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none transition-colors duration-300"
+                      className="w-full p-3 pl-10 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-300 hover:bg-white"
                       placeholder="E.g. 101, A1, B2"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Number of Rooms</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Bedrooms</label>
                   <div className="relative">
-                    <FaBed className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-blue-400" />
+                    <FaBed className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-blue-500" />
                     <input
                       type="number"
                       name="numberOfRooms"
                       value={formData.numberOfRooms}
                       onChange={handleInputChange}
-                      className="w-full p-3 pl-10 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none transition-colors duration-300"
+                      className="w-full p-3 pl-10 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-300 hover:bg-white"
                       placeholder="Number of rooms"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Number of Bathrooms</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Bathrooms</label>
                   <div className="relative">
-                    <FaBath className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-cyan-400" />
+                    <FaBath className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-cyan-500" />
                     <input
                       type="number"
                       name="numberOfBathrooms"
                       value={formData.numberOfBathrooms}
                       onChange={handleInputChange}
-                      className="w-full p-3 pl-10 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none transition-colors duration-300"
+                      className="w-full p-3 pl-10 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-300 hover:bg-white"
                       placeholder="Number of bathrooms"
                     />
                   </div>
@@ -340,7 +328,7 @@ const UploadRooms = () => {
             <div className="pt-6">
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold py-4 px-6 rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-300 flex items-center justify-center space-x-2 group transform hover:scale-105"
+                className="w-full bg-gray-900 text-white font-bold py-4 px-6 rounded-xl hover:bg-gray-800 transition-all duration-300 flex items-center justify-center space-x-2 group shadow-md transform hover:scale-105"
               >
                 <FaUpload className="h-5 w-5 group-hover:scale-110 transition-transform duration-300" />
                 <span>Upload Property</span>

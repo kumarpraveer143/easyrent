@@ -12,7 +12,7 @@ const MyRenters = () => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -88,35 +88,40 @@ const MyRenters = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-gray-50 text-gray-900">
       {/* Header Section */}
-      <div className="bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900 py-12 relative overflow-hidden pt-24">
-        <div className="absolute inset-0 bg-black opacity-20"></div>
+      <div className="bg-white py-16 relative overflow-hidden border-b border-gray-100">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-50 opacity-50"></div>
         <div className="absolute inset-0">
-          <div className="absolute top-0 left-0 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-          <div className="absolute top-0 right-0 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse" style={{animationDelay: '2s'}}></div>
+          <div className="absolute top-0 left-0 w-96 h-96 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" style={{ animationDelay: '2s' }}></div>
         </div>
-        
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <div className="flex items-center justify-center mb-6">
-              <button
-                onClick={() => navigate("/dashboard")}
-                className="mr-4 p-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors duration-300 group"
-              >
-                <FaArrowLeft className="h-5 w-5 text-blue-400 group-hover:scale-110 transition-transform duration-300" />
-              </button>
-              <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl">
-                <span className="block bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                  My Renters
-                </span>
+          <div className="flex items-center justify-between mb-6">
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="flex items-center space-x-2 bg-white border-2 border-gray-200 hover:bg-gray-50 hover:border-gray-300 text-gray-700 px-4 py-2 rounded-xl transition-all duration-300 group font-medium shadow-sm"
+            >
+              <FaArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform duration-300" />
+              <span>Back</span>
+            </button>
+
+            <div className="absolute left-1/2 transform -translate-x-1/2 text-center">
+              <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl mb-2">
+                My Renters
               </h1>
+              <p className="text-gray-600 text-lg">
+                Manage your active tenants
+              </p>
             </div>
-            <p className="mt-4 max-w-2xl text-lg text-gray-300 sm:text-xl mx-auto">
-              Manage your active tenants and rental relationships
-            </p>
-            <div className="mt-6 inline-flex items-center px-4 py-2 bg-green-600 bg-opacity-20 rounded-full border border-green-500">
-              <span className="text-green-300 text-sm font-medium">
+
+            <div className="w-20"></div>
+          </div>
+
+          <div className="flex justify-center mt-6">
+            <div className="inline-flex items-center px-5 py-2 bg-green-100 rounded-full border border-green-200">
+              <span className="text-green-700 text-sm font-bold">
                 {renters.length} Active Renter{renters.length !== 1 ? 's' : ''}
               </span>
             </div>
@@ -126,7 +131,7 @@ const MyRenters = () => {
 
       {/* Renters Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {renters.map((renter) => (
             <RenterCard
               key={renter.relationId}
@@ -147,63 +152,63 @@ const RenterCard = ({ renter, onCheckHistory, onAddRent, onRemoveRenter }) => {
   const { renterDetails, roomDetails } = renter;
 
   return (
-    <div className="group bg-gray-800 rounded-2xl shadow-2xl overflow-hidden border border-gray-700 hover:border-blue-500 transition-all duration-500 transform hover:-translate-y-2">
+    <div className="group bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100 hover:shadow-xl hover:border-primary-200 transition-all duration-300 hover:-translate-y-1">
       {/* Card Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6">
+      <div className="bg-gradient-to-r from-primary-600 to-indigo-600 p-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="h-12 w-12 rounded-xl bg-white bg-opacity-20 flex items-center justify-center">
+            <div className="h-12 w-12 rounded-xl bg-white bg-opacity-20 flex items-center justify-center backdrop-blur-sm">
               <FaUser className="h-6 w-6 text-white" />
             </div>
             <div>
               <h2 className="text-xl font-bold text-white">{renterDetails.name}</h2>
-              <p className="text-blue-100">Active Tenant</p>
+              <p className="text-blue-100 text-sm">Active Tenant</p>
             </div>
           </div>
           <div className="text-right">
             <div className="text-2xl font-bold text-white">
               Room {roomDetails.roomNumber}
             </div>
-            <div className="text-blue-100 capitalize">{roomDetails.roomType}</div>
+            <div className="text-blue-100 capitalize text-sm">{roomDetails.roomType}</div>
           </div>
         </div>
       </div>
 
       {/* Card Content */}
-      <div className="p-6 space-y-4">
+      <div className="p-5 space-y-4">
         {/* Contact Information */}
         <div className="space-y-3">
-          <div className="flex items-center space-x-3">
-            <FaEnvelope className="h-5 w-5 text-blue-400 flex-shrink-0" />
-            <div className="flex-1">
-              <p className="text-sm text-gray-400">Email</p>
-              <p className="text-gray-300 font-medium">{renterDetails.email}</p>
+          <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+            <FaEnvelope className="h-5 w-5 text-blue-500 flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-gray-500 font-medium">Email</p>
+              <p className="text-gray-900 font-semibold text-sm truncate">{renterDetails.email}</p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3">
-            <FaPhone className="h-5 w-5 text-green-400 flex-shrink-0" />
+          <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+            <FaPhone className="h-5 w-5 text-green-500 flex-shrink-0" />
             <div className="flex-1">
-              <p className="text-sm text-gray-400">Phone</p>
-              <p className="text-gray-300 font-medium">{renterDetails.phoneNumber}</p>
+              <p className="text-xs text-gray-500 font-medium">Phone</p>
+              <p className="text-gray-900 font-semibold">{renterDetails.phoneNumber}</p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3">
-            <FaCalendarAlt className="h-5 w-5 text-purple-400 flex-shrink-0" />
+          <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+            <FaCalendarAlt className="h-5 w-5 text-purple-500 flex-shrink-0" />
             <div className="flex-1">
-              <p className="text-sm text-gray-400">Date of Birth</p>
-              <p className="text-gray-300 font-medium">
+              <p className="text-xs text-gray-500 font-medium">Date of Birth</p>
+              <p className="text-gray-900 font-semibold">
                 {new Date(renterDetails.dateOfBirth).toLocaleDateString()}
               </p>
             </div>
           </div>
 
-          <div className="flex items-start space-x-3">
-            <FaMapMarkerAlt className="h-5 w-5 text-red-400 mt-1 flex-shrink-0" />
+          <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+            <FaMapMarkerAlt className="h-5 w-5 text-red-500 mt-1 flex-shrink-0" />
             <div className="flex-1">
-              <p className="text-sm text-gray-400">Address</p>
-              <p className="text-gray-300 font-medium">
+              <p className="text-xs text-gray-500 font-medium mb-1">Address</p>
+              <p className="text-gray-900 font-semibold text-sm">
                 {renterDetails.homeAddress.street}, {renterDetails.homeAddress.city}, {renterDetails.homeAddress.state} - {renterDetails.homeAddress.zipCode}
               </p>
             </div>
@@ -211,24 +216,24 @@ const RenterCard = ({ renter, onCheckHistory, onAddRent, onRemoveRenter }) => {
         </div>
 
         {/* Room Details */}
-        <div className="bg-gray-700 rounded-lg p-4">
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-100">
           <div className="flex items-center space-x-3 mb-3">
-            <FaHome className="h-5 w-5 text-blue-400" />
-            <h3 className="text-lg font-semibold text-white">Room Information</h3>
+            <FaHome className="h-5 w-5 text-primary-600" />
+            <h3 className="text-lg font-bold text-gray-900">Room Information</h3>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="flex items-center space-x-3">
-              <FaBed className="h-5 w-5 text-blue-400 flex-shrink-0" />
+              <FaBed className="h-5 w-5 text-primary-500 flex-shrink-0" />
               <div>
-                <p className="text-sm text-gray-400">Room Type</p>
-                <p className="text-gray-300 font-medium capitalize">{roomDetails.roomType}</p>
+                <p className="text-xs text-gray-600 font-medium">Room Type</p>
+                <p className="text-gray-900 font-bold capitalize">{roomDetails.roomType}</p>
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <FaMoneyBillWave className="h-5 w-5 text-green-400 flex-shrink-0" />
+              <FaMoneyBillWave className="h-5 w-5 text-green-500 flex-shrink-0" />
               <div>
-                <p className="text-sm text-gray-400">Rent Price</p>
-                <p className="text-gray-300 font-medium">₹{roomDetails.rentPrice}</p>
+                <p className="text-xs text-gray-600 font-medium">Rent Price</p>
+                <p className="text-gray-900 font-bold">₹{roomDetails.rentPrice}</p>
               </div>
             </div>
           </div>
@@ -236,27 +241,27 @@ const RenterCard = ({ renter, onCheckHistory, onAddRent, onRemoveRenter }) => {
       </div>
 
       {/* Action Buttons */}
-      <div className="bg-gray-700 p-4 space-y-3">
+      <div className="bg-gray-50 p-4 border-t border-gray-100">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <button
             onClick={onCheckHistory}
-            className="bg-gradient-to-r from-blue-500 to-blue-600 text-white py-2 px-4 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-300 flex items-center justify-center space-x-2 group"
+            className="bg-primary-600 text-white py-2.5 px-4 rounded-xl hover:bg-primary-700 transition-all duration-300 flex items-center justify-center space-x-2 group font-medium shadow-md"
           >
             <FaHistory className="h-4 w-4 group-hover:scale-110 transition-transform duration-300" />
             <span className="text-sm">History</span>
           </button>
-          
+
           <button
             onClick={onAddRent}
-            className="bg-gradient-to-r from-green-500 to-green-600 text-white py-2 px-4 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-300 flex items-center justify-center space-x-2 group"
+            className="bg-green-600 text-white py-2.5 px-4 rounded-xl hover:bg-green-700 transition-all duration-300 flex items-center justify-center space-x-2 group font-medium shadow-md"
           >
             <FaMoneyBillWave className="h-4 w-4 group-hover:scale-110 transition-transform duration-300" />
             <span className="text-sm">Add Rent</span>
           </button>
-          
+
           <button
             onClick={onRemoveRenter}
-            className="bg-gradient-to-r from-red-500 to-red-600 text-white py-2 px-4 rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-300 flex items-center justify-center space-x-2 group"
+            className="bg-red-600 text-white py-2.5 px-4 rounded-xl hover:bg-red-700 transition-all duration-300 flex items-center justify-center space-x-2 group font-medium shadow-md"
           >
             <FaTrashAlt className="h-4 w-4 group-hover:scale-110 transition-transform duration-300" />
             <span className="text-sm">Remove</span>
