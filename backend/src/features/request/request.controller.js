@@ -1,11 +1,13 @@
 import RequestRepository from "./request.respository.js";
 import NotificationRepository from "../notification/notification.repository.js";
+import UserRepository from "../users/user.repository.js";
 import { emitToUser } from "../../config/socket.config.js";
 
 class RequestController {
   constructor() {
     this.requestRespoitory = new RequestRepository();
     this.notificationRepository = new NotificationRepository();
+    this.userRepository = new UserRepository();
   }
   async toggleRequest(req, res) {
     const userId = req.userId;
@@ -18,20 +20,24 @@ class RequestController {
 
       // If a new request was created (not deleted), send notification to landowner
       if (switchRequest && !switchRequest.deletedAt) {
+        // Get user details
+        const user = await this.userRepository.getUserById(userId);
+        const userName = user ? user.name : "Someone";
+
         // Get room details to find owner
         const roomDetails = await this.requestRespoitory.getRoomDetails(roomId);
         if (roomDetails) {
           // Create notification in database
           const notification = await this.notificationRepository.createNotification({
-            userId: roomDetails.ownerId,
+            userId: roomDetails.owner,
             type: 'request_received',
-            message: `New rental request for Room ${roomDetails.roomNumber || 'N/A'}`,
+            message: `${userName} is requested for the room ${roomDetails.roomNumber || 'N/A'}`,
             roomId: roomId,
             roomNumber: roomDetails.roomNumber || 'N/A',
           });
 
           // Emit real-time notification via socket
-          emitToUser(roomDetails.ownerId.toString(), 'notification', {
+          emitToUser(roomDetails.owner.toString(), 'notification', {
             type: 'request_received',
             message: notification.message,
             roomId: roomId,

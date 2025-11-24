@@ -5,11 +5,13 @@ import Loading from "./Loading";
 import axios from "axios";
 import { connectSocket, disconnectSocket, onNotification, offNotification } from "../../services/socket.service";
 import { toast } from "react-toastify";
+import NotificationDropdown from "./NotificationDropdown";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -35,21 +37,23 @@ const Navbar = () => {
     if (userId) {
       connectSocket(userId);
 
-      // Listen for notifications
-      onNotification((data) => {
+      const handleNotification = (data) => {
         console.log("Notification received:", data);
         toast.info(data.message, {
           position: "top-right",
           autoClose: 5000,
         });
         fetchUnreadCount();
-      });
+      };
+
+      // Listen for notifications
+      onNotification(handleNotification);
 
       // Fetch initial unread count
       fetchUnreadCount();
 
       return () => {
-        offNotification();
+        offNotification(handleNotification);
         disconnectSocket();
       };
     }
@@ -128,7 +132,10 @@ const Navbar = () => {
             <>
               {/* Notification Bell */}
               <div className="relative">
-                <button className="relative p-2 text-gray-600 hover:text-primary-600 transition-colors duration-300">
+                <button
+                  onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+                  className="relative p-2 text-gray-600 hover:text-primary-600 transition-colors duration-300"
+                >
                   <FaBell className="h-6 w-6" />
                   {unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
@@ -136,6 +143,12 @@ const Navbar = () => {
                     </span>
                   )}
                 </button>
+                {isNotificationOpen && (
+                  <NotificationDropdown
+                    onClose={() => setIsNotificationOpen(false)}
+                    onMarkAsRead={fetchUnreadCount}
+                  />
+                )}
               </div>
 
               <button

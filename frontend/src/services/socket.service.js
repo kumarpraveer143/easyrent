@@ -44,9 +44,9 @@ export const onNotification = (callback) => {
     }
 };
 
-export const offNotification = () => {
+export const offNotification = (callback) => {
     if (socket) {
-        socket.off('notification');
+        socket.off('notification', callback);
     }
 };
 

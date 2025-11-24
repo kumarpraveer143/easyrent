@@ -69,35 +69,35 @@ const RenterMyRoom = () => {
   } = roomDetails;
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
+    <div className="font-sans bg-gray-50 text-gray-900 min-h-screen overflow-x-hidden">
       {/* Header Section */}
-      <div className="bg-white py-16 relative overflow-hidden border-b border-gray-100">
-        <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-teal-50 opacity-50"></div>
+      <div className="bg-white py-20 relative overflow-hidden border-b border-gray-100">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-50 opacity-70"></div>
         <div className="absolute inset-0">
-          <div className="absolute top-0 left-0 w-96 h-96 bg-green-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-teal-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" style={{ animationDelay: '2s' }}></div>
+          <div className="absolute top-0 right-0 w-96 h-96 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" style={{ animationDelay: '2s' }}></div>
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <button
               onClick={() => navigate(-1)}
-              className="flex items-center space-x-2 bg-white border-2 border-gray-200 hover:bg-gray-50 hover:border-gray-300 text-gray-700 px-4 py-2 rounded-xl transition-all duration-300 group font-medium shadow-sm"
+              className="group flex items-center space-x-2 bg-white border border-gray-200 hover:border-primary-300 text-gray-600 hover:text-primary-600 px-6 py-3 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md"
             >
               <FaArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform duration-300" />
-              <span>Back</span>
+              <span className="font-medium">Back</span>
             </button>
 
-            <div className="absolute left-1/2 transform -translate-x-1/2 text-center">
-              <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl mb-2">
-                My Current Room
+            <div className="text-center md:text-left">
+              <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl">
+                My Current <span className="text-primary-600">Room</span>
               </h1>
-              <p className="text-gray-600 text-lg">
-                Your rented property details
+              <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto md:mx-0">
+                Manage your rental details, payments, and view property information.
               </p>
             </div>
 
-            <div className="w-20"></div>
+            <div className="hidden md:block w-24"></div>
           </div>
         </div>
       </div>
@@ -105,57 +105,60 @@ const RenterMyRoom = () => {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Monthly Rent Highlight - Top Banner */}
-        <div className="bg-gradient-to-r from-green-500 to-teal-500 rounded-2xl p-6 mb-8 shadow-lg">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center space-x-4">
-              <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
-                <FaMoneyBillWave className="h-8 w-8 text-white" />
+        <div className="bg-gray-900 rounded-2xl p-8 mb-12 shadow-xl relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary-900 to-gray-900 opacity-50"></div>
+          <div className="absolute -right-20 -top-20 w-64 h-64 bg-primary-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 group-hover:opacity-30 transition-opacity duration-500"></div>
+
+          <div className="relative flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center space-x-6">
+              <div className="bg-white/10 p-4 rounded-2xl backdrop-blur-sm border border-white/10">
+                <FaMoneyBillWave className="h-10 w-10 text-primary-400" />
               </div>
               <div>
-                <p className="text-white/90 text-sm font-medium">Monthly Rent</p>
-                <p className="text-white font-bold text-3xl">₹{rentPrice}</p>
+                <p className="text-gray-400 text-sm font-medium uppercase tracking-wider">Monthly Rent</p>
+                <p className="text-white font-bold text-4xl mt-1">₹{rentPrice}</p>
               </div>
             </div>
             <button
               onClick={() => handleCheckHistory(roomDetails._id)}
-              className="bg-white text-green-600 font-bold py-3 px-6 rounded-xl hover:bg-gray-50 transition-all duration-300 flex items-center space-x-2 group shadow-md"
+              className="w-full md:w-auto bg-white text-gray-900 font-bold py-4 px-8 rounded-xl hover:bg-primary-50 transition-all duration-300 flex items-center justify-center space-x-3 group shadow-lg transform hover:-translate-y-0.5"
             >
-              <FaHistory className="h-5 w-5 group-hover:scale-110 transition-transform duration-300" />
-              <span>Payment History</span>
+              <FaHistory className="h-5 w-5 text-primary-600 group-hover:scale-110 transition-transform duration-300" />
+              <span>View Payment History</span>
             </button>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Property & Room Details */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-8">
             {/* Property Information Card */}
-            <div className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
-              <div className="bg-gradient-to-r from-primary-600 to-indigo-600 p-5">
-                <div className="flex items-center space-x-2">
-                  <FaBuilding className="h-5 w-5 text-white" />
-                  <h2 className="text-xl font-bold text-white">Property Information</h2>
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:border-primary-200 transition-all duration-300 group">
+              <div className="flex items-center space-x-4 mb-8">
+                <div className="h-12 w-12 rounded-xl bg-primary-50 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <FaBuilding className="h-6 w-6 text-primary-600" />
                 </div>
+                <h2 className="text-2xl font-bold text-gray-900">Property Information</h2>
               </div>
 
-              <div className="p-6 space-y-5">
-                <div className="flex items-start space-x-4">
-                  <div className="bg-green-50 p-3 rounded-xl">
-                    <FaHome className="h-6 w-6 text-green-600" />
+              <div className="space-y-6">
+                <div className="flex items-start space-x-4 p-4 rounded-xl hover:bg-gray-50 transition-colors duration-300">
+                  <div className="mt-1">
+                    <FaHome className="h-5 w-5 text-gray-400" />
                   </div>
-                  <div className="flex-1">
-                    <p className="text-gray-500 text-sm font-medium mb-1">Property Name</p>
-                    <p className="text-gray-900 font-bold text-xl">{houseName}</p>
+                  <div>
+                    <p className="text-sm text-gray-500 font-medium mb-1">Property Name</p>
+                    <p className="text-lg font-bold text-gray-900">{houseName}</p>
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-4">
-                  <div className="bg-blue-50 p-3 rounded-xl">
-                    <FaMapMarkerAlt className="h-6 w-6 text-blue-600" />
+                <div className="flex items-start space-x-4 p-4 rounded-xl hover:bg-gray-50 transition-colors duration-300">
+                  <div className="mt-1">
+                    <FaMapMarkerAlt className="h-5 w-5 text-gray-400" />
                   </div>
-                  <div className="flex-1">
-                    <p className="text-gray-500 text-sm font-medium mb-1">Full Address</p>
-                    <p className="text-gray-900 font-semibold">
+                  <div>
+                    <p className="text-sm text-gray-500 font-medium mb-1">Full Address</p>
+                    <p className="text-lg font-medium text-gray-900 leading-relaxed">
                       {address.street}, {address.city}, {address.state} - {address.zipCode}
                     </p>
                   </div>
@@ -164,109 +167,109 @@ const RenterMyRoom = () => {
             </div>
 
             {/* Room Details Card */}
-            <div className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
-              <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-5">
-                <div className="flex items-center space-x-2">
-                  <FaDoorOpen className="h-5 w-5 text-white" />
-                  <h2 className="text-xl font-bold text-white">Room Details</h2>
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:border-primary-200 transition-all duration-300 group">
+              <div className="flex items-center space-x-4 mb-8">
+                <div className="h-12 w-12 rounded-xl bg-primary-50 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <FaDoorOpen className="h-6 w-6 text-primary-600" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900">Room Details</h2>
+              </div>
+
+              {/* Room Number Highlight */}
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6 mb-8 border border-gray-200">
+                <div className="flex items-center space-x-5">
+                  <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-md border border-gray-100">
+                    <span className="text-primary-600 font-extrabold text-2xl">{roomNumber}</span>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 text-sm font-medium uppercase tracking-wide">Room Number</p>
+                    <p className="text-gray-900 font-bold text-2xl">Room {roomNumber}</p>
+                  </div>
                 </div>
               </div>
 
-              <div className="p-6">
-                {/* Room Number Highlight */}
-                <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4 mb-6 border border-purple-100">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-14 h-14 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
-                      <span className="text-white font-bold text-xl">{roomNumber}</span>
-                    </div>
-                    <div>
-                      <p className="text-gray-500 text-sm font-medium">Your Room Number</p>
-                      <p className="text-gray-900 font-bold text-2xl">Room {roomNumber}</p>
-                    </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 hover:border-primary-200 hover:shadow-md transition-all duration-300">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <FaBuilding className="h-5 w-5 text-primary-500" />
+                    <p className="text-gray-500 text-sm font-medium">Type</p>
                   </div>
+                  <p className="text-gray-900 font-bold text-lg capitalize">{roomType}</p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <FaBuilding className="h-5 w-5 text-blue-500" />
-                      <p className="text-gray-500 text-sm font-medium">Type</p>
-                    </div>
-                    <p className="text-gray-900 font-bold text-lg capitalize">{roomType}</p>
+                <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 hover:border-primary-200 hover:shadow-md transition-all duration-300">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <FaBed className="h-5 w-5 text-primary-500" />
+                    <p className="text-gray-500 text-sm font-medium">Bedrooms</p>
                   </div>
+                  <p className="text-gray-900 font-bold text-lg">{numberOfRooms}</p>
+                </div>
 
-                  <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <FaBed className="h-5 w-5 text-cyan-500" />
-                      <p className="text-gray-500 text-sm font-medium">Bedrooms</p>
-                    </div>
-                    <p className="text-gray-900 font-bold text-lg">{numberOfRooms}</p>
+                <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 hover:border-primary-200 hover:shadow-md transition-all duration-300">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <FaBath className="h-5 w-5 text-primary-500" />
+                    <p className="text-gray-500 text-sm font-medium">Bathrooms</p>
                   </div>
-
-                  <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <FaBath className="h-5 w-5 text-teal-500" />
-                      <p className="text-gray-500 text-sm font-medium">Bathrooms</p>
-                    </div>
-                    <p className="text-gray-900 font-bold text-lg">{numberOfBathrooms}</p>
-                  </div>
+                  <p className="text-gray-900 font-bold text-lg">{numberOfBathrooms}</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Right Column - Owner Details */}
-          <div className="space-y-6">
+          <div className="space-y-8">
             {/* Owner Details Card */}
-            <div className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
-              <div className="bg-gradient-to-r from-blue-500 to-cyan-500 p-5">
-                <div className="flex items-center space-x-2">
-                  <FaUser className="h-5 w-5 text-white" />
-                  <h2 className="text-xl font-bold text-white">Landowner Contact</h2>
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:border-primary-200 transition-all duration-300 group">
+              <div className="flex items-center space-x-4 mb-8">
+                <div className="h-12 w-12 rounded-xl bg-primary-50 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <FaUser className="h-6 w-6 text-primary-600" />
                 </div>
+                <h2 className="text-2xl font-bold text-gray-900">Landowner</h2>
               </div>
 
-              <div className="p-6 space-y-5">
-                <div className="flex items-start space-x-3">
-                  <div className="bg-blue-50 p-2 rounded-lg">
-                    <FaUser className="h-5 w-5 text-blue-600" />
+              <div className="space-y-6">
+                <div className="flex items-start space-x-4 p-4 rounded-xl bg-gray-50 border border-gray-100">
+                  <div className="mt-1">
+                    <FaUser className="h-5 w-5 text-gray-400" />
                   </div>
-                  <div className="flex-1">
-                    <p className="text-gray-500 text-xs font-medium mb-1">Name</p>
-                    <p className="text-gray-900 font-bold">{ownerName}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-3">
-                  <div className="bg-green-50 p-2 rounded-lg">
-                    <FaEnvelope className="h-5 w-5 text-green-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-gray-500 text-xs font-medium mb-1">Email</p>
-                    <p className="text-gray-900 font-semibold text-sm break-all">{ownerEmail}</p>
+                  <div>
+                    <p className="text-sm text-gray-500 font-medium mb-1">Name</p>
+                    <p className="text-lg font-bold text-gray-900">{ownerName}</p>
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-3">
-                  <div className="bg-red-50 p-2 rounded-lg">
-                    <FaPhone className="h-5 w-5 text-red-600" />
+                <div className="flex items-start space-x-4 p-4 rounded-xl bg-gray-50 border border-gray-100">
+                  <div className="mt-1">
+                    <FaEnvelope className="h-5 w-5 text-gray-400" />
                   </div>
-                  <div className="flex-1">
-                    <p className="text-gray-500 text-xs font-medium mb-1">Phone</p>
-                    <p className="text-gray-900 font-bold">{ownerNumber}</p>
+                  <div>
+                    <p className="text-sm text-gray-500 font-medium mb-1">Email</p>
+                    <p className="text-base font-semibold text-gray-900 break-all">{ownerEmail}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4 p-4 rounded-xl bg-gray-50 border border-gray-100">
+                  <div className="mt-1">
+                    <FaPhone className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 font-medium mb-1">Phone</p>
+                    <p className="text-lg font-bold text-gray-900">{ownerNumber}</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Info Banner */}
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-5 border border-blue-100">
-              <div className="flex items-start space-x-3">
-                <FaInfoCircle className="h-5 w-5 text-blue-600 mt-1 flex-shrink-0" />
+            <div className="bg-gradient-to-br from-primary-50 to-indigo-50 rounded-2xl p-6 border border-primary-100 shadow-sm">
+              <div className="flex items-start space-x-4">
+                <div className="bg-white p-2 rounded-lg shadow-sm">
+                  <FaInfoCircle className="h-6 w-6 text-primary-600" />
+                </div>
                 <div>
                   <h3 className="text-gray-900 font-bold mb-2">Need Help?</h3>
                   <p className="text-gray-600 text-sm leading-relaxed">
-                    For any issues or queries regarding your room, payment, or maintenance, please contact your landowner using the details provided above.
+                    For any issues regarding your room, payment, or maintenance, please contact your landowner directly using the details above.
                   </p>
                 </div>
               </div>
