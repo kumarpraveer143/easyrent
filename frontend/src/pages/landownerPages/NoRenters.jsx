@@ -1,72 +1,95 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { MdOutlineGroupOff } from "react-icons/md";
-import { FaArrowLeft, FaUsers } from "react-icons/fa";
+import { FaArrowLeft, FaUsers, FaSearch } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 
 const NoRenters = () => {
   const navigate = useNavigate();
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      {/* Header Section */}
-      <div className="bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900 py-12 relative overflow-hidden pt-24">
-        <div className="absolute inset-0 bg-black opacity-20"></div>
+    <div className="font-sans bg-gray-50 text-gray-900 min-h-screen flex flex-col">
+      {/* Hero Section */}
+      <div className="relative bg-white py-20 overflow-hidden border-b border-gray-100 flex-grow flex items-center justify-center">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-50 opacity-70"></div>
         <div className="absolute inset-0">
-          <div className="absolute top-0 left-0 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-          <div className="absolute top-0 right-0 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse" style={{animationDelay: '2s'}}></div>
+          <div className="absolute top-0 right-0 w-96 h-96 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" style={{ animationDelay: '2s' }}></div>
         </div>
-        
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <div className="flex items-center justify-center mb-6">
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <div className={`max-w-3xl mx-auto text-center transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+
+            <div className="mb-8 relative inline-block">
+              <div className="absolute inset-0 bg-primary-200 rounded-full blur-xl opacity-50 animate-pulse"></div>
+              <div className="relative bg-white p-6 rounded-full shadow-xl border border-gray-100">
+                <MdOutlineGroupOff className="w-16 h-16 text-primary-500" />
+              </div>
+            </div>
+
+            <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl mb-6">
+              <span className="block">No Active Renters</span>
+              <span className="block text-primary-600 mt-2 text-3xl sm:text-4xl">Found at the Moment</span>
+            </h1>
+
+            <p className="mt-4 text-xl text-gray-600 mb-10 leading-relaxed max-w-2xl mx-auto">
+              It looks like you don't have any active tenants right now. Once you accept rental requests, your tenants will appear here.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <button
                 onClick={() => navigate("/dashboard")}
-                className="mr-4 p-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors duration-300 group"
+                className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white transition-all duration-200 bg-gray-900 font-pj rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 shadow-lg hover:shadow-xl hover:-translate-y-1"
               >
-                <FaArrowLeft className="h-5 w-5 text-blue-400 group-hover:scale-110 transition-transform duration-300" />
+                <FaArrowLeft className="mr-2 h-5 w-5 group-hover:-translate-x-1 transition-transform duration-300" />
+                Back to Dashboard
               </button>
-              <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl">
-                <span className="block bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                  No Renters Found
-                </span>
-              </h1>
-            </div>
-            <p className="mt-4 max-w-2xl text-lg text-gray-300 sm:text-xl mx-auto">
-              No active tenants at the moment
-            </p>
-          </div>
-        </div>
-      </div>
 
-      {/* Content Section */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 overflow-hidden">
-          <div className="p-12 text-center">
-            <div className="mb-8">
-              <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mb-6 group">
-                <MdOutlineGroupOff className="w-12 h-12 text-white group-hover:scale-110 transition-transform duration-300" />
-              </div>
-              <h2 className="text-3xl font-bold text-white mb-4">
-                No Active Renters
-              </h2>
-              <p className="text-gray-300 text-lg max-w-md mx-auto leading-relaxed">
-                There are currently no active renters in your properties. New tenants will appear here once they are assigned to rooms.
-              </p>
+              <button
+                onClick={() => navigate("/incoming-request")}
+                className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-gray-900 transition-all duration-200 bg-white border-2 border-gray-200 font-pj rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 hover:bg-gray-50 hover:border-gray-300 shadow-sm hover:shadow-md hover:-translate-y-1"
+              >
+                <FaSearch className="mr-2 h-5 w-5 text-primary-600 group-hover:scale-110 transition-transform duration-300" />
+                Check Requests
+              </button>
             </div>
-            
-            <div className="space-y-4">
-              <Link to="/dashboard">
-                <button className="bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold py-4 px-8 rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-300 flex items-center justify-center space-x-2 group transform hover:scale-105 mx-auto">
-                  <FaArrowLeft className="h-5 w-5 group-hover:scale-110 transition-transform duration-300" />
-                  <span>Back to Dashboard</span>
-                </button>
-              </Link>
-              
-              <div className="flex items-center justify-center space-x-2 text-gray-400">
-                <FaUsers className="h-4 w-4 animate-pulse" />
-                <span className="text-sm">Active renters will appear here automatically</span>
+
+            <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6 text-left">
+              <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-gray-100 shadow-sm">
+                <div className="flex items-center space-x-3 mb-2">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <FaUsers className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <h3 className="font-bold text-gray-900">Manage Tenants</h3>
+                </div>
+                <p className="text-sm text-gray-600">View details and history of your active renters.</p>
+              </div>
+
+              <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-gray-100 shadow-sm">
+                <div className="flex items-center space-x-3 mb-2">
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <FaSearch className="h-4 w-4 text-green-600" />
+                  </div>
+                  <h3 className="font-bold text-gray-900">Find Renters</h3>
+                </div>
+                <p className="text-sm text-gray-600">Review incoming requests from potential tenants.</p>
+              </div>
+
+              <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-gray-100 shadow-sm">
+                <div className="flex items-center space-x-3 mb-2">
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <MdOutlineGroupOff className="h-4 w-4 text-purple-600" />
+                  </div>
+                  <h3 className="font-bold text-gray-900">Stay Updated</h3>
+                </div>
+                <p className="text-sm text-gray-600">Get notified when new tenants join your property.</p>
               </div>
             </div>
+
           </div>
         </div>
       </div>

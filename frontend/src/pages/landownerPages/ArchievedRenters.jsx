@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 const ArchievedRenters = () => {
   const [renters, setRenters] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   const navigate = useNavigate();
 
@@ -31,6 +32,7 @@ const ArchievedRenters = () => {
     };
 
     fetchData();
+    setIsVisible(true);
   }, []);
 
   const handleCheckHistory = (relationId) => {
@@ -79,50 +81,60 @@ const ArchievedRenters = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
-      {/* Header Section */}
-      <div className="bg-white py-16 relative overflow-hidden border-b border-gray-100">
-        <div className="absolute inset-0 bg-gradient-to-br from-orange-50 to-red-50 opacity-50"></div>
+    <div className="font-sans bg-gray-50 text-gray-900 min-h-screen overflow-x-hidden">
+      {/* Hero Section */}
+      <div className="relative bg-white py-20 overflow-hidden border-b border-gray-100">
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-50 to-red-50 opacity-70"></div>
         <div className="absolute inset-0">
-          <div className="absolute top-0 left-0 w-96 h-96 bg-orange-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-red-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" style={{ animationDelay: '2s' }}></div>
+          <div className="absolute top-0 right-0 w-96 h-96 bg-orange-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-red-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" style={{ animationDelay: '2s' }}></div>
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-6">
-            <button
-              onClick={() => navigate("/dashboard")}
-              className="flex items-center space-x-2 bg-white border-2 border-gray-200 hover:bg-gray-50 hover:border-gray-300 text-gray-700 px-4 py-2 rounded-xl transition-all duration-300 group font-medium shadow-sm"
-            >
-              <FaArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform duration-300" />
-              <span>Back</span>
-            </button>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className={`transition-all duration-1000 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`}>
+              <button
+                onClick={() => navigate("/dashboard")}
+                className="mb-8 flex items-center space-x-2 bg-white border-2 border-gray-200 hover:bg-gray-50 hover:border-gray-300 text-gray-700 px-4 py-2 rounded-xl transition-all duration-300 group font-medium shadow-sm w-fit"
+              >
+                <FaArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform duration-300" />
+                <span>Back to Dashboard</span>
+              </button>
 
-            <div className="absolute left-1/2 transform -translate-x-1/2 text-center">
-              <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl mb-2">
-                Archived Renters
+              <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
+                <span className="block text-gray-900">
+                  Archived
+                </span>
+                <span className="block text-orange-600 mt-2">Tenant Records</span>
               </h1>
-              <p className="text-gray-600 text-lg">
-                View archived tenant records
+              <p className="mt-6 max-w-md text-lg text-gray-600 sm:text-xl md:mt-8 md:max-w-3xl leading-relaxed">
+                View and manage your archived tenant records. Access complete rental history and payment details.
               </p>
             </div>
 
-            <div className="w-20"></div>
-          </div>
-
-          <div className="flex justify-center mt-6">
-            <div className="inline-flex items-center px-5 py-2 bg-orange-100 rounded-full border border-orange-200">
-              <span className="text-orange-700 text-sm font-bold">
-                {renters.length} Archived Renter{renters.length !== 1 ? 's' : ''}
-              </span>
+            <div className={`transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'}`}>
+              <div className="bg-white p-6 rounded-2xl shadow-xl border border-gray-100 transform rotate-2 hover:rotate-0 transition-all duration-500">
+                <div className="flex items-center space-x-4 mb-4">
+                  <div className="p-3 bg-orange-100 rounded-full">
+                    <FaArchive className="h-6 w-6 text-orange-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 font-medium">Total Archived</p>
+                    <p className="text-3xl font-bold text-gray-900">{renters.length}</p>
+                  </div>
+                </div>
+                <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-orange-500 w-full rounded-full animate-pulse"></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Renters Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {renters.map((renter) => (
             <ArchivedRenterCard
               key={renter.relationId}
@@ -142,63 +154,65 @@ const ArchivedRenterCard = ({ renter, onCheckHistory, onRemoveRenter }) => {
   const { renterDetails, roomDetails } = renter;
 
   return (
-    <div className="group bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100 hover:shadow-xl hover:border-orange-200 transition-all duration-300 hover:-translate-y-1">
+    <div className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 border border-gray-100 hover:border-orange-200 overflow-hidden">
       {/* Card Header */}
-      <div className="bg-gradient-to-r from-orange-600 to-red-600 p-5">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="h-12 w-12 rounded-xl bg-white bg-opacity-20 flex items-center justify-center backdrop-blur-sm">
-              <FaArchive className="h-6 w-6 text-white" />
+      <div className="bg-gradient-to-r from-orange-600 to-red-600 p-6 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-10 -mt-10 blur-xl"></div>
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-black opacity-10 rounded-full -ml-10 -mb-10 blur-xl"></div>
+
+        <div className="relative flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="h-14 w-14 rounded-2xl bg-white bg-opacity-20 flex items-center justify-center backdrop-blur-sm shadow-inner border border-white/30">
+              <FaArchive className="h-7 w-7 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white">{renterDetails.name}</h2>
-              <p className="text-orange-100 text-sm">Archived Tenant</p>
+              <h2 className="text-2xl font-bold text-white tracking-tight">{renterDetails.name}</h2>
+              <div className="flex items-center space-x-2 mt-1">
+                <span className="inline-block w-2 h-2 bg-gray-300 rounded-full"></span>
+                <p className="text-orange-100 text-sm font-medium">Archived Tenant</p>
+              </div>
             </div>
           </div>
-          <div className="text-right">
+          <div className="text-right bg-white/10 p-3 rounded-xl backdrop-blur-sm border border-white/20">
             <div className="text-2xl font-bold text-white">
-              Room {roomDetails.roomNumber}
+              {roomDetails.roomNumber}
             </div>
-            <div className="text-orange-100 capitalize text-sm">{roomDetails.roomType}</div>
+            <div className="text-orange-100 capitalize text-xs font-medium tracking-wider uppercase">{roomDetails.roomType}</div>
           </div>
         </div>
       </div>
 
       {/* Card Content */}
-      <div className="p-5 space-y-4">
+      <div className="p-6 space-y-6">
         {/* Contact Information */}
-        <div className="space-y-3">
-          <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-            <FaEnvelope className="h-5 w-5 text-blue-500 flex-shrink-0" />
+        <div className="space-y-4">
+          <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-300 border border-gray-100">
+            <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+              <FaEnvelope className="h-5 w-5 text-blue-600" />
+            </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs text-gray-500 font-medium">Email</p>
+              <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Email Address</p>
               <p className="text-gray-900 font-semibold text-sm truncate">{renterDetails.email}</p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-            <FaPhone className="h-5 w-5 text-green-500 flex-shrink-0" />
+          <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-300 border border-gray-100">
+            <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+              <FaPhone className="h-5 w-5 text-green-600" />
+            </div>
             <div className="flex-1">
-              <p className="text-xs text-gray-500 font-medium">Phone</p>
+              <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Phone Number</p>
               <p className="text-gray-900 font-semibold">{renterDetails.phoneNumber}</p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-            <FaCalendarAlt className="h-5 w-5 text-purple-500 flex-shrink-0" />
-            <div className="flex-1">
-              <p className="text-xs text-gray-500 font-medium">Date of Birth</p>
-              <p className="text-gray-900 font-semibold">
-                {new Date(renterDetails.dateOfBirth).toLocaleDateString()}
-              </p>
+          <div className="flex items-start space-x-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-300 border border-gray-100">
+            <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-1">
+              <FaMapMarkerAlt className="h-5 w-5 text-red-600" />
             </div>
-          </div>
-
-          <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
-            <FaMapMarkerAlt className="h-5 w-5 text-red-500 mt-1 flex-shrink-0" />
             <div className="flex-1">
-              <p className="text-xs text-gray-500 font-medium mb-1">Address</p>
-              <p className="text-gray-900 font-semibold text-sm">
+              <p className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Permanent Address</p>
+              <p className="text-gray-900 font-semibold text-sm leading-relaxed">
                 {renterDetails.homeAddress.street}, {renterDetails.homeAddress.city}, {renterDetails.homeAddress.state} - {renterDetails.homeAddress.zipCode}
               </p>
             </div>
@@ -206,47 +220,47 @@ const ArchivedRenterCard = ({ renter, onCheckHistory, onRemoveRenter }) => {
         </div>
 
         {/* Room Details */}
-        <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-4 border border-orange-100">
-          <div className="flex items-center space-x-3 mb-3">
+        <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-5 border border-gray-200">
+          <div className="flex items-center space-x-3 mb-4 border-b border-gray-200 pb-3">
             <FaHome className="h-5 w-5 text-orange-600" />
-            <h3 className="text-lg font-bold text-gray-900">Room Information</h3>
+            <h3 className="text-lg font-bold text-gray-900">Room Details</h3>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center space-x-3">
-              <FaBed className="h-5 w-5 text-orange-500 flex-shrink-0" />
-              <div>
-                <p className="text-xs text-gray-600 font-medium">Room Type</p>
-                <p className="text-gray-900 font-bold capitalize">{roomDetails.roomType}</p>
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-1">
+              <div className="flex items-center space-x-2 text-gray-500 mb-1">
+                <FaBed className="h-4 w-4" />
+                <span className="text-xs font-bold uppercase tracking-wider">Type</span>
               </div>
+              <p className="text-gray-900 font-bold capitalize text-lg">{roomDetails.roomType}</p>
             </div>
-            <div className="flex items-center space-x-3">
-              <FaMoneyBillWave className="h-5 w-5 text-orange-500 flex-shrink-0" />
-              <div>
-                <p className="text-xs text-gray-600 font-medium">Rent Price</p>
-                <p className="text-gray-900 font-bold">₹{roomDetails.rentPrice}</p>
+            <div className="space-y-1">
+              <div className="flex items-center space-x-2 text-gray-500 mb-1">
+                <FaMoneyBillWave className="h-4 w-4" />
+                <span className="text-xs font-bold uppercase tracking-wider">Rent</span>
               </div>
+              <p className="text-orange-600 font-bold text-lg">₹{roomDetails.rentPrice}<span className="text-xs text-gray-500 font-normal">/mo</span></p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Action Buttons */}
-      <div className="bg-gray-50 p-4 border-t border-gray-100">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="bg-gray-50 p-5 border-t border-gray-100">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <button
             onClick={onCheckHistory}
-            className="bg-primary-600 text-white py-2.5 px-4 rounded-xl hover:bg-primary-700 transition-all duration-300 flex items-center justify-center space-x-2 group font-medium shadow-md"
+            className="flex items-center justify-center space-x-2 px-4 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 font-semibold shadow-sm group"
           >
-            <FaHistory className="h-4 w-4 group-hover:scale-110 transition-transform duration-300" />
-            <span className="text-sm">View History</span>
+            <FaHistory className="h-4 w-4 text-gray-500 group-hover:text-primary-600 transition-colors" />
+            <span>View History</span>
           </button>
 
           <button
             onClick={onRemoveRenter}
-            className="bg-red-600 text-white py-2.5 px-4 rounded-xl hover:bg-red-700 transition-all duration-300 flex items-center justify-center space-x-2 group font-medium shadow-md"
+            className="flex items-center justify-center space-x-2 px-4 py-3 bg-red-50 text-red-600 border border-red-100 rounded-xl hover:bg-red-100 transition-all duration-300 font-semibold"
           >
-            <FaTrashAlt className="h-4 w-4 group-hover:scale-110 transition-transform duration-300" />
-            <span className="text-sm">Remove</span>
+            <FaTrashAlt className="h-4 w-4" />
+            <span>Remove</span>
           </button>
         </div>
       </div>
