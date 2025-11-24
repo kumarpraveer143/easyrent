@@ -231,8 +231,8 @@ const LandOwnerRooms = () => {
                     </div>
                   </div>
                   <div className={`px-3 py-1 rounded-full text-sm font-semibold ${room.isAvailable
-                      ? 'bg-green-500 text-white'
-                      : 'bg-red-500 text-white'
+                    ? 'bg-green-500 text-white'
+                    : 'bg-red-500 text-white'
                     }`}>
                     {room.isAvailable ? 'Available' : 'Occupied'}
                   </div>
@@ -420,7 +420,7 @@ const LandOwnerRooms = () => {
                     className="w-full bg-purple-600 text-white py-2.5 px-4 rounded-xl hover:bg-purple-700 transition-all duration-300 flex items-center justify-center space-x-2 group font-medium shadow-md"
                   >
                     <FaBell className="h-4 w-4 group-hover:scale-110 transition-transform duration-300" />
-                    <span>View Requests</span>
+                    <span>View Requests ({room.requestCount || 0})</span>
                   </button>
                 )}
               </div>

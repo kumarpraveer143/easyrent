@@ -45,7 +45,38 @@ class RoomRepository {
 
   //get rooms by owner id
   async getRoomsByOwnerId(id) {
-    return await RoomModel.find({ owner: id });
+    const rooms = await RoomModel.aggregate([
+      {
+        $match: { owner: new mongoose.Types.ObjectId(id) },
+      },
+      {
+        $lookup: {
+          from: "requests",
+          localField: "_id",
+          foreignField: "roomId",
+          as: "requests",
+        },
+      },
+      {
+        $addFields: {
+          requestCount: {
+            $size: {
+              $filter: {
+                input: "$requests",
+                as: "req",
+                cond: { $eq: ["$$req.status", "pending"] },
+              },
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          requests: 0,
+        },
+      },
+    ]);
+    return rooms;
   }
 
   //return all the rooms repo
