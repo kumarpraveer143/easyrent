@@ -93,6 +93,9 @@ const NotificationDropdown = ({ onClose, onMarkAsRead }) => {
                 // Stay on current page or navigate to a general page
                 // navigate('/landowner-rooms'); // Optional: redirect if needed
                 break;
+            case 'rent_paid':
+                navigate('/my-renters');
+                break;
             default:
                 break;
         }

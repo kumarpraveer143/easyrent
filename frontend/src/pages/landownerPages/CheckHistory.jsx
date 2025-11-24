@@ -28,15 +28,21 @@ const CheckHistory = () => {
   }, [])
 
   useEffect(() => {
-    setLoading(true);
     const fetchHistory = async () => {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/history/${relationId}`, {
-        withCredentials: true,
-      });
-      setRentHistory(response.data.history);
+      try {
+        setLoading(true);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/history/${relationId}`, {
+          withCredentials: true,
+        });
+        setRentHistory(response.data.history);
+      } catch (error) {
+        console.error("Error fetching history:", error);
+        toast.error("Failed to fetch history");
+      } finally {
+        setLoading(false);
+      }
     };
     fetchHistory();
-    setLoading(false);
   }, [relationId]);
 
   const formatDate = (dateString) => {

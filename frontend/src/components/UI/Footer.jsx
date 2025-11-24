@@ -120,7 +120,7 @@ const Footer = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link to="/blog" className="text-gray-600 hover:text-primary-600 transition-colors duration-300 font-medium">
+                  <Link to="https://blogging-application-ten.vercel.app" target="_blank" className="text-gray-600 hover:text-primary-600 transition-colors duration-300 font-medium">
                     Blog
                   </Link>
                 </li>

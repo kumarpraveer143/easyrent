@@ -1,11 +1,17 @@
 import stripe from '../../config/stripe.config.js';
 import PaymentRepository from './payment.repository.js';
 import HistoryRepository from '../history/history.repository.js';
+import NotificationRepository from '../notification/notification.repository.js';
+import UserRepository from '../users/user.repository.js';
+import RoomRepository from '../rooms/room.repository.js';
 
 class PaymentController {
     constructor() {
         this.paymentRepository = new PaymentRepository();
         this.historyRepository = new HistoryRepository();
+        this.notificationRepository = new NotificationRepository();
+        this.userRepository = new UserRepository();
+        this.roomRepository = new RoomRepository();
     }
 
     // Create Stripe Checkout Session
@@ -120,6 +126,24 @@ class PaymentController {
                 // For now, let's just create it.
                 const history = await this.historyRepository.createHistory(historyObj);
 
+                // Create Notification for Landowner
+                try {
+                    const renter = await this.userRepository.getUserById(session.metadata.renterId);
+                    const room = await this.roomRepository.getRoomById(session.metadata.roomId);
+
+                    if (renter && room) {
+                        await this.notificationRepository.createNotification({
+                            userId: session.metadata.ownerId,
+                            type: 'rent_paid',
+                            message: `${renter.name} paid you the rent.`,
+                            roomId: session.metadata.roomId,
+                            roomNumber: room.roomNumber.toString()
+                        });
+                    }
+                } catch (notifError) {
+                    console.error('Failed to create notification:', notifError);
+                }
+
                 return res.status(200).json({
                     success: true,
                     paid: true,
@@ -181,6 +205,24 @@ class PaymentController {
                     // In a real app, we'd use a unique constraint on stripeSessionId.
 
                     await this.historyRepository.createHistory(historyObj);
+
+                    // Create Notification for Landowner
+                    try {
+                        const renter = await this.userRepository.getUserById(session.metadata.renterId);
+                        const room = await this.roomRepository.getRoomById(session.metadata.roomId);
+
+                        if (renter && room) {
+                            await this.notificationRepository.createNotification({
+                                userId: session.metadata.ownerId,
+                                type: 'rent_paid',
+                                message: `${renter.name} paid you the rent.`,
+                                roomId: session.metadata.roomId,
+                                roomNumber: room.roomNumber.toString()
+                            });
+                        }
+                    } catch (notifError) {
+                        console.error('Failed to create notification in webhook:', notifError);
+                    }
 
                     console.log('Payment successful, history created via webhook');
                 }
