@@ -32,6 +32,25 @@ EasyRent is a comprehensive web application designed to bridge the gap between l
   - New rental requests (for Landowners).
   - Request acceptance or rejection (for Renters).
   - Request withdrawals (for Landowners).
+  - **Payment Confirmations:** Landowners get notified when a renter completes a payment.
+- **Smart Automation:**
+  - **Auto-Rejection:** When a room is accepted, all other pending requests for that room are automatically rejected, and applicants are notified instantly.
+- **Dynamic Updates:**
+  - **Request Counters:** Real-time view of how many people are interested in a specific property directly on the dashboard.
+
+## 🧠 Challenges & Solutions
+
+### 1. Real-Time State Synchronization
+**Challenge:** Ensuring that when a room is booked, it immediately appears unavailable to other users to prevent double-booking, and all involved parties are notified.
+**Solution:** Implemented a robust **Socket.io** architecture that broadcasts state changes instantly. When a request is accepted, the server triggers events to update the landowner's dashboard and notify all affected renters simultaneously.
+
+### 2. Complex Relationship Lifecycle
+**Challenge:** Managing the transition of a user from a "Guest" to "Applicant" to "Tenant" and finally to "Archived Tenant" without losing data history.
+**Solution:** Designed a flexible database schema with distinct collections for `Requests`, `Relationships` (Active), and `History`. Transition logic ensures data is securely moved and linked, preserving the entire rental history for both parties.
+
+### 3. Concurrency Control
+**Challenge:** Handling scenarios where multiple users request the same room at the same time.
+**Solution:** Implemented atomic database operations and backend validation checks. Before accepting a request, the system re-verifies the room's availability and the validity of the request to prevent race conditions.
 
 ## 🛠️ Technology Stack
 
