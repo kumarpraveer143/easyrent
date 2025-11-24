@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import Loading from "../components/UI/Loading";
+import axios from "axios";
 import {
   FaUser,
   FaEdit,
@@ -53,14 +54,24 @@ const Profile = () => {
 
   const handleSave = async () => {
     try {
-      // Update user data in localStorage
-      localStorage.setItem("user", JSON.stringify(formData));
-      setUser(formData);
-      toast.success("Profile Updated Successfully!");
-      setIsEditing(false);
+      const response = await axios.put(
+        `${import.meta.env.VITE_API_URL}/users/editprofile`,
+        formData,
+        { withCredentials: true }
+      );
+
+      if (response.data.success) {
+        // Update user data in localStorage
+        localStorage.setItem("user", JSON.stringify(formData));
+        setUser(formData);
+        toast.success("Profile Updated Successfully!");
+        setIsEditing(false);
+      } else {
+        toast.error(response.data.msg || "Failed to update profile");
+      }
     } catch (error) {
       console.error("Error updating profile:", error);
-      toast.error("Something went wrong!");
+      toast.error(error.response?.data?.msg || "Something went wrong!");
     }
   };
 

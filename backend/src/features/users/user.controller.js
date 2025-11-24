@@ -140,13 +140,42 @@ export default class UserController {
 
   //user edit controller
   async editProfile(req, res) {
-    const token = req.cookies.token;
-    const payload = jwt.verify(token, process.env.SECRET_KEY);
-    const id = payload.id;
-    const updatedUser = await this.userRepository.updateUserById(id, req.body);
-    return res
-      .status(200)
-      .json({ success: true, message: "updated successfully!" });
+    try {
+      const token = req.cookies.token;
+      const payload = jwt.verify(token, process.env.SECRET_KEY);
+      const id = payload.id;
+
+      // Explicitly filter allowed fields to avoid updating sensitive/immutable data
+      const allowedFields = ['name', 'phoneNumber', 'dateOfBirth', 'homeAddress', 'houseName', 'aadharCardNumber'];
+      const updateData = {};
+
+      Object.keys(req.body).forEach(key => {
+        if (allowedFields.includes(key)) {
+          updateData[key] = req.body[key];
+        }
+      });
+
+      console.log("Updating user:", id);
+      console.log("Filtered update data:", JSON.stringify(updateData, null, 2));
+
+      const updatedUser = await this.userRepository.updateUserById(id, updateData);
+
+      console.log("Updated user result:", updatedUser);
+
+      if (!updatedUser) {
+        return res.status(404).json({ success: false, message: "User not found" });
+      }
+
+      return res
+        .status(200)
+        .json({ success: true, message: "updated successfully!", user: updatedUser });
+    } catch (err) {
+      console.error("Error updating profile:", err);
+      return res.status(500).json({
+        success: false,
+        message: "Failed to update profile",
+      });
+    }
   }
 
   //user forget password controller
@@ -154,7 +183,7 @@ export default class UserController {
     const { email } = req.body;
     try {
       const user = await this.userRepository.findUserByEmail({ email }, true);
-      
+
       if (!user) {
         return res
           .status(400)

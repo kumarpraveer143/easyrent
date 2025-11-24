@@ -41,7 +41,8 @@ export default class UserRepository {
   async updateUserById(id, data) {
     const updatedUser = await userModel.findOneAndUpdate(
       { _id: id },
-      { ...data }
+      data,
+      { new: true, runValidators: true }
     );
     return updatedUser;
   }
