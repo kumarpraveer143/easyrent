@@ -10,13 +10,13 @@ class RequestRepository {
       if (!existingRequest) {
         const newRequest = new requestModel({ renterId, roomId });
         await newRequest.save();
-        return newRequest;
+        return { request: newRequest, action: 'created' };
       } else {
         const deletedRequest = await requestModel.findOneAndDelete({
           renterId,
           roomId,
         });
-        return deletedRequest;
+        return { request: deletedRequest, action: 'deleted' };
       }
     } catch (err) {
       console.log(err);

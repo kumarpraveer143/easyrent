@@ -89,6 +89,10 @@ const NotificationDropdown = ({ onClose, onMarkAsRead }) => {
             case 'request_rejected':
                 navigate('/findRooms');
                 break;
+            case 'request_withdrawn':
+                // Stay on current page or navigate to a general page
+                // navigate('/landowner-rooms'); // Optional: redirect if needed
+                break;
             default:
                 break;
         }

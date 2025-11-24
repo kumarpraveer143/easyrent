@@ -13,13 +13,14 @@ class RequestController {
     const userId = req.userId;
     const roomId = req.params.id;
     try {
-      const switchRequest = await this.requestRespoitory.toggleRequest(
+      const result = await this.requestRespoitory.toggleRequest(
         userId,
         roomId
       );
 
-      // If a new request was created (not deleted), send notification to landowner
-      if (switchRequest && !switchRequest.deletedAt) {
+      const { request: switchRequest, action } = result || {};
+
+      if (switchRequest) {
         // Get user details
         const user = await this.userRepository.getUserById(userId);
         const userName = user ? user.name : "Someone";
@@ -27,23 +28,36 @@ class RequestController {
         // Get room details to find owner
         const roomDetails = await this.requestRespoitory.getRoomDetails(roomId);
         if (roomDetails) {
-          // Create notification in database
-          const notification = await this.notificationRepository.createNotification({
-            userId: roomDetails.owner,
-            type: 'request_received',
-            message: `${userName} is requested for the room ${roomDetails.roomNumber || 'N/A'}`,
-            roomId: roomId,
-            roomNumber: roomDetails.roomNumber || 'N/A',
-          });
+          let notificationType = null;
+          let notificationMessage = null;
 
-          // Emit real-time notification via socket
-          emitToUser(roomDetails.owner.toString(), 'notification', {
-            type: 'request_received',
-            message: notification.message,
-            roomId: roomId,
-            roomNumber: roomDetails.roomNumber || 'N/A',
-            createdAt: notification.createdAt,
-          });
+          if (action === 'created') {
+            notificationType = 'request_received';
+            notificationMessage = `${userName} is requested for the room ${roomDetails.roomNumber || 'N/A'}`;
+          } else if (action === 'deleted') {
+            notificationType = 'request_withdrawn';
+            notificationMessage = `${userName} withdrew the request for room ${roomDetails.roomNumber || 'N/A'}`;
+          }
+
+          if (notificationType) {
+            // Create notification in database
+            const notification = await this.notificationRepository.createNotification({
+              userId: roomDetails.owner,
+              type: notificationType,
+              message: notificationMessage,
+              roomId: roomId,
+              roomNumber: roomDetails.roomNumber || 'N/A',
+            });
+
+            // Emit real-time notification via socket
+            emitToUser(roomDetails.owner.toString(), 'notification', {
+              type: notificationType,
+              message: notification.message,
+              roomId: roomId,
+              roomNumber: roomDetails.roomNumber || 'N/A',
+              createdAt: notification.createdAt,
+            });
+          }
         }
       }
 
