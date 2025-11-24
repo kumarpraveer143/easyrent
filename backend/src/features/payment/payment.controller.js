@@ -21,6 +21,9 @@ class PaymentController {
                 });
             }
 
+            // Get frontend URL from env or fallback to origin
+            const frontendUrl = process.env.FRONTEND_URL || req.headers.origin || 'http://localhost:5173';
+
             // Create checkout session
             const session = await stripe.checkout.sessions.create({
                 payment_method_types: ['card'],
@@ -38,8 +41,8 @@ class PaymentController {
                     },
                 ],
                 mode: 'payment',
-                success_url: `${process.env.FRONTEND_URL}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-                cancel_url: `${process.env.FRONTEND_URL}/payment-cancelled`,
+                success_url: `${frontendUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+                cancel_url: `${frontendUrl}/payment-cancelled`,
                 metadata: {
                     relationId: relationId.toString(),
                     renterId: renterId.toString(),
