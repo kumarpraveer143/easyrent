@@ -20,6 +20,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import NoRoomsFound from "../NoRoomsFound";
 import Loading from "../../components/UI/Loading";
+import PayRent from "../../components/PayRent";
 
 const RenterMyRoom = () => {
   const navigate = useNavigate();
@@ -58,7 +59,7 @@ const RenterMyRoom = () => {
     return <NoRoomsFound />;
   }
 
-  const { houseName, ownerNumber, ownerName, ownerEmail, roomDetails } = room;
+  const { houseName, ownerNumber, ownerName, ownerEmail, roomDetails, relationId, renterId, ownerId } = room;
   const {
     address,
     rentPrice,
@@ -259,6 +260,15 @@ const RenterMyRoom = () => {
                 </div>
               </div>
             </div>
+
+            {/* Pay Rent Section */}
+            <PayRent
+              relationId={relationId}
+              rentAmount={rentPrice}
+              renterId={renterId}
+              ownerId={ownerId}
+              roomId={roomDetails._id}
+            />
 
             {/* Info Banner */}
             <div className="bg-gradient-to-br from-primary-50 to-indigo-50 rounded-2xl p-6 border border-primary-100 shadow-sm">

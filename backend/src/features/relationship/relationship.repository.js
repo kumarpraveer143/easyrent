@@ -79,6 +79,9 @@ class RelationshipSchma {
       .populate("roomId")
       .populate("ownerId");
     let extractedData = {
+      relationId: room._id,
+      renterId: room.renterId,
+      ownerId: room.ownerId._id,
       houseName: room.ownerId.houseName,
       ownerNumber: room.ownerId.phoneNumber,
       ownerName: room.ownerId.name,

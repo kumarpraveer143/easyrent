@@ -28,6 +28,23 @@ const HistorySchema = new Schema(
       type: String,
       maxlength: 500,
     },
+
+    // NEW: Stripe payment fields
+    stripeSessionId: {
+      type: String,
+      default: null,
+    },
+
+    stripePaymentIntentId: {
+      type: String,
+      default: null,
+    },
+
+    paymentStatus: {
+      type: String,
+      enum: ["pending", "completed", "failed", "refunded"],
+      default: "completed",
+    },
   },
   {
     timestamps: true,

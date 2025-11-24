@@ -14,6 +14,7 @@ import requestRouter from "./src/features/request/request.router.js";
 import relationshipRouter from "./src/features/relationship/relationship.router.js";
 import searchRoomRouter from "./src/features/searchRooms/searchRooms.route.js";
 import notificationRouter from "./src/features/notification/notification.route.js";
+import paymentRouter from "./src/features/payment/payment.route.js";
 dotenv.config();
 
 const app = express();
@@ -39,7 +40,15 @@ app.get("/get/user", (req, res) => {
 
 //Middlewares
 
-app.use(bodyParser.json());
+// Use conditional body parser to skip JSON parsing for Stripe webhooks
+app.use((req, res, next) => {
+  if (req.originalUrl.startsWith('/api/payment/webhook')) {
+    next();
+  } else {
+    bodyParser.json()(req, res, next);
+  }
+});
+
 app.use(cookieParser());
 app.use("/api/users", userRouter);
 app.use("/api/rooms", roomRouter);
@@ -49,6 +58,7 @@ app.use("/api/request", requestRouter);
 app.use("/api/relationship", relationshipRouter);
 app.use("/api/search", searchRoomRouter);
 app.use("/api/notifications", notificationRouter);
+app.use("/api/payment", paymentRouter);
 
 server.listen(port, () => {
   connectToMongoose();

@@ -53,6 +53,9 @@ const RenterMyRoom = React.lazy(() =>
   import("./pages/rentersPages/RenterMyRoom")
 );
 
+const PaymentSuccess = React.lazy(() => import("./pages/PaymentSuccess"));
+const PaymentCancelled = React.lazy(() => import("./pages/PaymentCancelled"));
+
 const PaymentHistory = React.lazy(() =>
   import("./pages/landownerPages/PaymentHistory")
 );
@@ -103,6 +106,8 @@ const App = () => {
                   element={<RenterHistoryDetails />}
                 />
                 <Route path="/favouriteRooms" element={<FavouriteRoom />} />
+                <Route path="/payment-success" element={<PaymentSuccess />} />
+                <Route path="/payment-cancelled" element={<PaymentCancelled />} />
               </Route>
 
               {/* Routes for only landowners */}
