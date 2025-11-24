@@ -15,6 +15,12 @@ class RelationshipController {
     const { roomId, renterId } = req.body;
 
     try {
+      // Get all pending requests for this room BEFORE accepting (which deletes them)
+      const allRequests = await this.requestRepository.getUser(roomId);
+
+      // Filter out the one being accepted to identify who needs to be rejected
+      const rejectedRequests = allRequests.filter(req => req.renterId && req.renterId._id.toString() !== renterId);
+
       const newRequest = await this.relaltionshipRepository.acceptRequest({
         ownerId,
         roomId,
@@ -23,9 +29,10 @@ class RelationshipController {
 
       // Get room details for notification
       const roomDetails = await this.requestRepository.getRoomDetails(roomId);
+
       if (roomDetails) {
-        // Create notification in database
-        const notification = await this.notificationRepository.createNotification({
+        // 1. Send acceptance notification
+        const acceptNotification = await this.notificationRepository.createNotification({
           userId: renterId,
           type: 'request_accepted',
           message: `Your request for Room ${roomDetails.roomNumber || 'N/A'} was accepted`,
@@ -33,14 +40,34 @@ class RelationshipController {
           roomNumber: roomDetails.roomNumber || 'N/A',
         });
 
-        // Emit real-time notification via socket
         emitToUser(renterId.toString(), 'notification', {
           type: 'request_accepted',
-          message: notification.message,
+          message: acceptNotification.message,
           roomId: roomId,
           roomNumber: roomDetails.roomNumber || 'N/A',
-          createdAt: notification.createdAt,
+          createdAt: acceptNotification.createdAt,
         });
+
+        // 2. Send rejection notifications to all other applicants
+        for (const req of rejectedRequests) {
+          const rejectedUserId = req.renterId._id;
+
+          const rejectNotification = await this.notificationRepository.createNotification({
+            userId: rejectedUserId,
+            type: 'request_rejected',
+            message: `Your request for Room ${roomDetails.roomNumber || 'N/A'} was rejected because the room has been rented.`,
+            roomId: roomId,
+            roomNumber: roomDetails.roomNumber || 'N/A',
+          });
+
+          emitToUser(rejectedUserId.toString(), 'notification', {
+            type: 'request_rejected',
+            message: rejectNotification.message,
+            roomId: roomId,
+            roomNumber: roomDetails.roomNumber || 'N/A',
+            createdAt: rejectNotification.createdAt,
+          });
+        }
       }
 
       return res
