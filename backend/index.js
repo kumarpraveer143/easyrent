@@ -24,7 +24,7 @@ const server = createServer(app);
 initializeSocket(server);
 
 const corsOptions = {
-  origin: ["https://easyrent-red.vercel.app", "http://localhost:5173"],
+  origin: true, // Allow all origins for debugging
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,

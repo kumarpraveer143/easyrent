@@ -31,7 +31,8 @@ const PayRent = ({ relationId, rentAmount, renterId, ownerId, roomId }) => {
             }
         } catch (error) {
             console.error('Payment error:', error);
-            toast.error('Failed to process payment. Please try again.');
+            const errorMessage = error.response?.data?.message || error.message || 'Failed to process payment';
+            toast.error(errorMessage);
         } finally {
             setLoading(false);
         }
