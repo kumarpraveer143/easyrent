@@ -18,7 +18,7 @@ const PaymentCancelled = () => {
                 </p>
 
                 <button
-                    onClick={() => navigate('/my-room')}
+                    onClick={() => navigate('/rentersMyRoom')}
                     className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 flex items-center justify-center space-x-2"
                 >
                     <FaArrowLeft className="h-5 w-5" />

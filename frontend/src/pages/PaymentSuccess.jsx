@@ -17,7 +17,7 @@ const PaymentSuccess = () => {
             verifyPayment(sessionId);
         } else {
             toast.error('Invalid payment session');
-            navigate('/my-room');
+            navigate('/rentersMyRoom');
         }
     }, [searchParams]);
 
@@ -34,16 +34,16 @@ const PaymentSuccess = () => {
 
                 // Redirect after 3 seconds
                 setTimeout(() => {
-                    navigate('/my-room');
+                    navigate('/rentersMyRoom');
                 }, 3000);
             } else {
                 toast.error('Payment verification failed');
-                navigate('/my-room');
+                navigate('/rentersMyRoom');
             }
         } catch (error) {
             console.error('Verification error:', error);
             toast.error('Failed to verify payment');
-            navigate('/my-room');
+            navigate('/rentersMyRoom');
         } finally {
             setVerifying(false);
         }
