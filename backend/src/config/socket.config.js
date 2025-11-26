@@ -1,4 +1,5 @@
 import { Server } from "socket.io";
+import { saveMessage } from "../features/chat/chat.controller.js";
 
 let io;
 const userSockets = new Map(); // Map to store userId -> socketId
@@ -19,6 +20,26 @@ export const initializeSocket = (server) => {
         socket.on("register", (userId) => {
             userSockets.set(userId, socket.id);
             console.log(`User ${userId} registered with socket ${socket.id}`);
+        });
+
+        // Join a chat room
+        socket.on("join_chat", (relationId) => {
+            socket.join(relationId);
+            console.log(`Socket ${socket.id} joined room ${relationId}`);
+        });
+
+        // Handle sending messages
+        socket.on("send_message", async (data) => {
+            const { relationId, senderId, message } = data;
+            try {
+                // Save message to database
+                const savedMessage = await saveMessage(relationId, senderId, message);
+
+                // Emit to the room
+                io.to(relationId).emit("receive_message", savedMessage);
+            } catch (error) {
+                console.error("Error sending message:", error);
+            }
         });
 
         // Handle disconnection

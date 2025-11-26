@@ -15,6 +15,7 @@ import relationshipRouter from "./src/features/relationship/relationship.router.
 import searchRoomRouter from "./src/features/searchRooms/searchRooms.route.js";
 import notificationRouter from "./src/features/notification/notification.route.js";
 import paymentRouter from "./src/features/payment/payment.route.js";
+import chatRouter from "./src/features/chat/chat.route.js";
 dotenv.config();
 
 const app = express();
@@ -59,6 +60,7 @@ app.use("/api/relationship", relationshipRouter);
 app.use("/api/search", searchRoomRouter);
 app.use("/api/notifications", notificationRouter);
 app.use("/api/payment", paymentRouter);
+app.use("/api/chat", chatRouter);
 
 server.listen(port, () => {
   connectToMongoose();

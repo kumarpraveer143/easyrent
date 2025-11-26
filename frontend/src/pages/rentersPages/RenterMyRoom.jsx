@@ -15,17 +15,24 @@ import {
   FaDoorOpen,
   FaCalendar,
   FaInfoCircle,
+  FaComments,
 } from "react-icons/fa";
 
 import { useNavigate } from "react-router-dom";
 import NoRoomsFound from "../NoRoomsFound";
 import Loading from "../../components/UI/Loading";
 import PayRent from "../../components/PayRent";
+import { connectSocket, getSocket } from "../../services/socket.service";
+import Chat from "../../components/Chat";
 
 const RenterMyRoom = () => {
   const navigate = useNavigate();
   const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showChat, setShowChat] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const user = JSON.parse(localStorage.getItem("user"));
+  const socket = getSocket();
 
   const handleCheckHistory = (roomId) => {
     navigate("/renter-history");
@@ -33,6 +40,11 @@ const RenterMyRoom = () => {
 
   useEffect(() => {
     setLoading(true);
+    // Connect socket when component mounts
+    if (user && user._id) {
+      connectSocket(user._id);
+    }
+
     const getRoomDetails = async () => {
       try {
         const response = await axios.get(
@@ -49,7 +61,58 @@ const RenterMyRoom = () => {
     };
 
     getRoomDetails();
+
+    // Cleanup socket on unmount
+    return () => {
+      // We don't disconnect here because Navbar might use it, 
+      // but if we wanted to be strict we could. 
+      // Usually socket is managed globally or in a context.
+    };
   }, []);
+
+  const relationId = room?.relationId;
+
+  // Listen for new messages to update unread count
+  useEffect(() => {
+    if (socket && relationId) {
+      const handleMessage = (message) => {
+        if (!showChat && message.relationId === relationId) {
+          setUnreadCount((prev) => prev + 1);
+        }
+      };
+
+      socket.on("receive_message", handleMessage);
+
+      return () => {
+        socket.off("receive_message", handleMessage);
+      };
+    }
+  }, [socket, showChat, relationId]);
+
+  // Fetch initial unread count
+  useEffect(() => {
+    if (relationId && user) {
+      const fetchUnreadCount = async () => {
+        try {
+          const response = await axios.get(
+            `${import.meta.env.VITE_API_URL}/chat/unread/${relationId}/${user._id}`,
+            { withCredentials: true }
+          );
+          setUnreadCount(response.data.count);
+        } catch (error) {
+          console.error("Error fetching unread count:", error);
+        }
+      };
+      fetchUnreadCount();
+    }
+  }, [relationId, user]);
+
+  // Reset count when chat opens
+  useEffect(() => {
+    if (showChat) {
+      setUnreadCount(0);
+    }
+  }, [showChat]);
 
   if (loading) {
     return <Loading />;
@@ -59,7 +122,7 @@ const RenterMyRoom = () => {
     return <NoRoomsFound />;
   }
 
-  const { houseName, ownerNumber, ownerName, ownerEmail, roomDetails, relationId, renterId, ownerId } = room;
+  const { houseName, ownerNumber, ownerName, ownerEmail, roomDetails, renterId, ownerId } = room;
   const {
     address,
     rentPrice,
@@ -258,6 +321,19 @@ const RenterMyRoom = () => {
                     <p className="text-lg font-bold text-gray-900">{ownerNumber}</p>
                   </div>
                 </div>
+
+                <button
+                  onClick={() => setShowChat(true)}
+                  className="w-full flex items-center justify-center space-x-2 px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 relative"
+                >
+                  <FaComments className="h-5 w-5" />
+                  <span className="font-semibold">Chat with Landowner</span>
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center border-2 border-white">
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
               </div>
             </div>
 
@@ -287,6 +363,15 @@ const RenterMyRoom = () => {
           </div>
         </div>
       </div>
+
+      {showChat && (
+        <Chat
+          relationId={relationId}
+          senderId={user._id}
+          recipientName={ownerName}
+          onClose={() => setShowChat(false)}
+        />
+      )}
     </div>
   );
 };

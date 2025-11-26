@@ -1,16 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { FaHistory, FaMoneyBillWave, FaTrashAlt, FaUser, FaEnvelope, FaPhone, FaCalendarAlt, FaMapMarkerAlt, FaHome, FaBed, FaArrowLeft } from "react-icons/fa";
+import { FaHistory, FaMoneyBillWave, FaTrashAlt, FaUser, FaEnvelope, FaPhone, FaCalendarAlt, FaMapMarkerAlt, FaHome, FaBed, FaArrowLeft, FaComments } from "react-icons/fa";
 import axios from "axios";
 import Swal from "sweetalert2";
 import { toast } from "react-toastify";
 import NoRenters from "./NoRenters";
 import { useNavigate } from "react-router-dom";
 import Loading from "../../components/UI/Loading";
+import Chat from "../../components/Chat";
+import { getSocket } from "../../services/socket.service";
 
 const MyRenters = () => {
   const [renters, setRenters] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [activeChat, setActiveChat] = useState(null);
+  const user = JSON.parse(localStorage.getItem("user"));
 
   const navigate = useNavigate();
 
@@ -151,17 +155,70 @@ const MyRenters = () => {
               onCheckHistory={() => handleCheckHistory(renter.relationId)}
               onAddRent={() => handleAddRent(renter.relationId, renter.roomDetails.rentPrice)}
               onRemoveRenter={() => handleRemoveRenter(renter.relationId)}
+              onChat={() => setActiveChat(renter)}
+              isActive={activeChat?.relationId === renter.relationId}
             />
           ))}
         </div>
       </div>
+
+      {activeChat && (
+        <Chat
+          relationId={activeChat.relationId}
+          senderId={user._id}
+          recipientName={activeChat.renterDetails.name}
+          onClose={() => setActiveChat(null)}
+        />
+      )}
     </div>
   );
 };
 
 // Separate component for a single renter card
-const RenterCard = ({ renter, onCheckHistory, onAddRent, onRemoveRenter }) => {
-  const { renterDetails, roomDetails } = renter;
+const RenterCard = ({ renter, onCheckHistory, onAddRent, onRemoveRenter, onChat, isActive }) => {
+  const { renterDetails, roomDetails, relationId } = renter;
+  const [unreadCount, setUnreadCount] = useState(0);
+  const user = JSON.parse(localStorage.getItem("user"));
+  const socket = getSocket();
+
+  useEffect(() => {
+    if (relationId && user) {
+      const fetchUnreadCount = async () => {
+        try {
+          const response = await axios.get(
+            `${import.meta.env.VITE_API_URL}/chat/unread/${relationId}/${user._id}`,
+            { withCredentials: true }
+          );
+          setUnreadCount(response.data.count);
+        } catch (error) {
+          console.error("Error fetching unread count:", error);
+        }
+      };
+      fetchUnreadCount();
+    }
+  }, [relationId, user]);
+
+  useEffect(() => {
+    if (socket && user) {
+      socket.emit("join_chat", relationId);
+
+      const handleMessage = (message) => {
+        if (message.relationId === relationId && message.senderId !== user._id && !isActive) {
+          setUnreadCount((prev) => prev + 1);
+        }
+      };
+      socket.on("receive_message", handleMessage);
+      return () => socket.off("receive_message", handleMessage);
+    }
+  }, [socket, relationId, user?._id, isActive]);
+
+  // Reset count if this card becomes the active chat (we need to know if it is active)
+  // Since we don't have that prop, we rely on the user clicking "Chat". 
+  // When they click "Chat", `onChat` is called. We can reset here.
+  const handleChatClick = () => {
+    setUnreadCount(0);
+    onChat();
+  };
 
   return (
     <div className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 border border-gray-100 hover:border-primary-200 overflow-hidden">
@@ -256,7 +313,20 @@ const RenterCard = ({ renter, onCheckHistory, onAddRent, onRemoveRenter }) => {
 
       {/* Action Buttons */}
       <div className="bg-gray-50 p-5 border-t border-gray-100">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <button
+            onClick={handleChatClick}
+            className="flex items-center justify-center space-x-2 px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-300 font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5 relative"
+          >
+            <FaComments className="h-4 w-4" />
+            <span>Chat</span>
+            {unreadCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center border-2 border-white">
+                {unreadCount}
+              </span>
+            )}
+          </button>
+
           <button
             onClick={onCheckHistory}
             className="flex items-center justify-center space-x-2 px-4 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 font-semibold shadow-sm group"
