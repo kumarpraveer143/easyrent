@@ -39,6 +39,10 @@ app.get("/get/user", (req, res) => {
   res.json({ message: "Bakend is working properly!" });
 });
 
+app.get("/", (req, res) => {
+  res.send("working fine")
+})
+
 //Middlewares
 
 // Use conditional body parser to skip JSON parsing for Stripe webhooks
