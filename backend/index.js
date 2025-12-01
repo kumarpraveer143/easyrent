@@ -36,8 +36,8 @@ app.use(cors(corsOptions));
 const port = process.env.PORT;
 
 app.use((req, res, next) => {
-  // Skip if it's a socket.io request or already starts with /api (local)
-  if (req.url.includes("socket.io") || req.url.startsWith("/api/")) {
+  // Skip if it's a direct socket.io request (local) or local api request
+  if (req.url.startsWith("/socket.io") || req.url.startsWith("/api/")) {
     return next();
   }
 
