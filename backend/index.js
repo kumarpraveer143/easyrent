@@ -35,10 +35,12 @@ app.use(cors(corsOptions));
 
 const port = process.env.PORT;
 
-app.use((req,res,next)=>{
-  req.url=req.url.replace(/^\/[^\/]+/,"");
-  next();
-})
+// app.use((req, res, next) => {
+//   if (!req.url.startsWith("/socket.io/")) {
+//     req.url = req.url.replace(/^\/[^\/]+/, "");
+//   }
+//   next();
+// })
 
 app.get("/get/user", (req, res) => {
   res.json({ message: "Bakend is working properly!" });

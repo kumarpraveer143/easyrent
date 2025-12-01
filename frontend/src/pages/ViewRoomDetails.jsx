@@ -196,22 +196,24 @@ const ViewRoomDetails = () => {
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => navigate(-1)}
-              className="flex items-center space-x-2 bg-white border-2 border-gray-200 hover:bg-gray-50 hover:border-gray-300 text-gray-700 px-4 py-2 rounded-xl transition-all duration-300 group font-medium shadow-sm"
-            >
-              <FaArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform duration-300" />
-              <span>Back</span>
-            </button>
+          <div className="flex flex-col sm:flex-row items-center justify-between relative gap-4 sm:gap-0">
+            <div className="w-full sm:w-auto flex justify-start">
+              <button
+                onClick={() => navigate(-1)}
+                className="flex items-center space-x-2 bg-white border-2 border-gray-200 hover:bg-gray-50 hover:border-gray-300 text-gray-700 px-4 py-2 rounded-xl transition-all duration-300 group font-medium shadow-sm"
+              >
+                <FaArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform duration-300" />
+                <span>Back</span>
+              </button>
+            </div>
 
-            <div className="text-center">
+            <div className="sm:absolute sm:left-1/2 sm:transform sm:-translate-x-1/2 text-center">
               <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
                 Room Details
               </h1>
             </div>
 
-            <div className="w-20"></div>
+            <div className="hidden sm:block w-20"></div>
           </div>
         </div>
       </div>
@@ -250,8 +252,8 @@ const ViewRoomDetails = () => {
               <button
                 onClick={handleToggleFavorite}
                 className={`w-full font-bold py-3 px-6 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2 group shadow-md ${isFavorite
-                    ? 'bg-pink-500 text-white hover:bg-pink-600'
-                    : 'bg-white text-pink-500 border-2 border-pink-500 hover:bg-pink-50'
+                  ? 'bg-pink-500 text-white hover:bg-pink-600'
+                  : 'bg-white text-pink-500 border-2 border-pink-500 hover:bg-pink-50'
                   }`}
               >
                 {isFavorite ? (
@@ -271,8 +273,8 @@ const ViewRoomDetails = () => {
                 <button
                   onClick={handleRequest}
                   className={`w-full font-bold py-3 px-6 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2 group shadow-md ${hasRequested
-                      ? 'bg-red-500 text-white hover:bg-red-600'
-                      : 'bg-gray-900 text-white hover:bg-gray-800'
+                    ? 'bg-red-500 text-white hover:bg-red-600'
+                    : 'bg-gray-900 text-white hover:bg-gray-800'
                     }`}
                 >
                   {hasRequested ? (
@@ -367,8 +369,8 @@ const ViewRoomDetails = () => {
               <button
                 onClick={handleToggleFavorite}
                 className={`w-full font-bold py-3 px-6 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2 group shadow-md ${isFavorite
-                    ? 'bg-pink-500 text-white hover:bg-pink-600'
-                    : 'bg-white text-pink-500 border-2 border-pink-500 hover:bg-pink-50'
+                  ? 'bg-pink-500 text-white hover:bg-pink-600'
+                  : 'bg-white text-pink-500 border-2 border-pink-500 hover:bg-pink-50'
                   }`}
               >
                 {isFavorite ? (
@@ -388,8 +390,8 @@ const ViewRoomDetails = () => {
                 <button
                   onClick={handleRequest}
                   className={`w-full font-bold py-3 px-6 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2 group shadow-md ${hasRequested
-                      ? 'bg-red-500 text-white hover:bg-red-600'
-                      : 'bg-gray-900 text-white hover:bg-gray-800'
+                    ? 'bg-red-500 text-white hover:bg-red-600'
+                    : 'bg-gray-900 text-white hover:bg-gray-800'
                     }`}
                 >
                   {hasRequested ? (

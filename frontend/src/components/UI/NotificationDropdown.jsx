@@ -55,7 +55,7 @@ const NotificationDropdown = ({ onClose, onMarkAsRead }) => {
             setNotifications(prev =>
                 prev.map(n => n._id === id ? { ...n, isRead: true } : n)
             );
-            onMarkAsRead();
+            await onMarkAsRead();
         } catch (error) {
             console.error('Error marking notification as read:', error);
         }
@@ -67,15 +67,15 @@ const NotificationDropdown = ({ onClose, onMarkAsRead }) => {
                 withCredentials: true,
             });
             setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
-            onMarkAsRead();
+            await onMarkAsRead();
         } catch (error) {
             console.error('Error marking all notifications as read:', error);
         }
     };
 
-    const handleNotificationClick = (notification) => {
+    const handleNotificationClick = async (notification) => {
         if (!notification.isRead) {
-            handleMarkAsRead(notification._id);
+            await handleMarkAsRead(notification._id);
         }
 
         // Navigate based on notification type
