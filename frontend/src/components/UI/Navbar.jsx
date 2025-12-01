@@ -22,7 +22,7 @@ const Navbar = () => {
   const fetchUnreadCount = async () => {
     if (userId) {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/notifications/unread`, {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/notifications/unread?t=${new Date().getTime()}`, {
           withCredentials: true,
         });
         setUnreadCount(response.data.count || 0);
