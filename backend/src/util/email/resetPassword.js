@@ -238,7 +238,7 @@ const sendPasswordResetEmail = async (user, resetPasswordURL) => {
             </p>
             
             <center>
-                <a href="https://easyrent-red.vercel.app/reset/${resetPasswordURL}" class="cta-button">Reset My Password</a>
+                <a href="${process.env.FRONTEND_URL}/reset/${resetPasswordURL}" class="cta-button">Reset My Password</a>
             </center>
             
             <div class="alert-box">
@@ -266,7 +266,7 @@ const sendPasswordResetEmail = async (user, resetPasswordURL) => {
                 If the button above doesn't work, copy and paste this link into your browser:
             </p>
             <p class="message" style="word-break: break-all; color: #007bff;">
-                https://easyrent-red.vercel.app/reset/${resetPasswordURL}
+                ${process.env.FRONTEND_URL}/reset/${resetPasswordURL}
             </p>
             
             <p class="message" style="margin-top: 30px;">
