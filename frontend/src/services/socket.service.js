@@ -6,8 +6,13 @@ const SOCKET_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://
 
 export const connectSocket = (userId) => {
     if (!socket) {
-        const isLocal = SOCKET_URL.includes('localhost');
-        const socketPath = isLocal ? '/socket.io' : '/backend/socket.io';
+        console.log('Initializing socket with URL:', SOCKET_URL);
+
+        // Check if we are in production (IP or Domain)
+        const isProduction = SOCKET_URL.includes('13.201.30.59') || SOCKET_URL.includes('easyrentify.xyz');
+        const socketPath = isProduction ? '/backend/socket.io' : '/socket.io';
+
+        console.log('Using socket path:', socketPath);
 
         socket = io(SOCKET_URL, {
             path: socketPath,
