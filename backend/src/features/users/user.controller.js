@@ -98,14 +98,20 @@ export default class UserController {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+          domain: process.env.NODE_ENV === "production" ? ".easyrentify.xyz" : undefined,
+          path: "/",
+          maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         })
         .cookie("userId", user._id, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+          domain: process.env.NODE_ENV === "production" ? ".easyrentify.xyz" : undefined,
+          path: "/",
+          maxAge: 7 * 24 * 60 * 60 * 1000
         })
         .status(200)
-        .json({ success: true, user: user });
+        .json({ success: true, user });
     } catch (err) {
       console.log(err);
       return res.status(500).json({
