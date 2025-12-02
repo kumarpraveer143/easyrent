@@ -7,8 +7,9 @@ const SOCKET_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://
 export const connectSocket = (userId) => {
     if (!socket) {
         socket = io(SOCKET_URL, {
+            path: "/api/socket.io",
             withCredentials: true,
-            transports: ['websocket', 'polling'],
+            transports: ['polling', 'websocket'],
         });
 
         socket.on('connect', () => {
