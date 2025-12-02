@@ -7,7 +7,7 @@ const userSockets = new Map(); // Map to store userId -> socketId
 export const initializeSocket = (server) => {
     io = new Server(server, {
         cors: {
-            origin: ["https://easyrent-red.vercel.app", "http://localhost:5173", "http://15.206.194.51", "https://easyrentify.xyz", "https://www.easyrentify.xyz"],
+            origin: ["https://easyrent-red.vercel.app", "http://localhost:5173", "http://13.201.30.59","https://13.201.30.59", "https://easyrentify.xyz", "https://www.easyrentify.xyz"],
             methods: ["GET", "POST"],
             credentials: true,
         },
