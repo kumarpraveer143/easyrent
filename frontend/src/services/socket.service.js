@@ -6,8 +6,11 @@ const SOCKET_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://
 
 export const connectSocket = (userId) => {
     if (!socket) {
+        const isLocal = SOCKET_URL.includes('localhost');
+        const socketPath = isLocal ? '/socket.io' : '/backend/socket.io';
+
         socket = io(SOCKET_URL, {
-            path: "/api/socket.io",
+            path: socketPath,
             withCredentials: true,
             transports: ['polling', 'websocket'],
         });
