@@ -24,8 +24,10 @@ const server = createServer(app);
 // Initialize Socket.IO
 initializeSocket(server);
 
+app.set("trust proxy", 1);
+
 const corsOptions = {
-  origin: true, // Allow all origins for debugging
+  origin: ["http://localhost:5173", "https://easyrent-nu.vercel.app", process.env.FRONTEND_URL],
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
