@@ -16,14 +16,14 @@ notificationRouter.get("/unread", jwtAuth, (req, res) => {
     notificationController.getUnreadCount(req, res);
 });
 
-// Mark a notification as read
-notificationRouter.patch("/:id/read", jwtAuth, (req, res) => {
-    notificationController.markAsRead(req, res);
-});
-
 // Mark all notifications as read
 notificationRouter.patch("/read-all", jwtAuth, (req, res) => {
     notificationController.markAllAsRead(req, res);
+});
+
+// Mark a notification as read
+notificationRouter.patch("/:id/read", jwtAuth, (req, res) => {
+    notificationController.markAsRead(req, res);
 });
 
 export default notificationRouter;

@@ -66,7 +66,10 @@ const NotificationDropdown = ({ onClose, onMarkAsRead }) => {
             await axios.patch(`${import.meta.env.VITE_API_URL}/notifications/read-all`, {}, {
                 withCredentials: true,
             });
+            // Update local state immediately for responsiveness
             setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+            // Sync with server to be sure
+            await fetchNotifications();
             await onMarkAsRead();
         } catch (error) {
             console.error('Error marking all notifications as read:', error);

@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import NotificationModel from "./notification.schema.js";
 
 class NotificationRepository {
@@ -49,9 +50,12 @@ class NotificationRepository {
 
     async markAllAsRead(userId) {
         try {
+            // Ensure userId is an ObjectId
+            const userObjectId = new mongoose.Types.ObjectId(userId);
+
             const result = await NotificationModel.updateMany(
-                { userId, isRead: false },
-                { isRead: true }
+                { userId: userObjectId },
+                { $set: { isRead: true } }
             );
             return result;
         } catch (error) {
