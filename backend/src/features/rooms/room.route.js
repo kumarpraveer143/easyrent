@@ -3,6 +3,14 @@ import RoomController from "./room.controller.js";
 import landOwnerAuth from "../../middleware/landOwners.js";
 import adminAuth from "../../middleware/adminAuth.js";
 import { requireAuth, authorize } from "../../middleware/authorize.js";
+import validate from "../../middleware/validate.js";
+import {
+  createRoomSchema,
+  updateRoomSchema,
+  roomIdParam,
+  roomIdParamAlt,
+  availableRoomQuery,
+} from "../../validation/schemas.js";
 
 const roomRouter = express.Router();
 const roomController = new RoomController();
@@ -16,30 +24,46 @@ const roomController = new RoomController();
 
 // Browsing available rooms is public — a listing site nobody can see without
 // an account has no acquisition channel. (Full public listing pages: B29.)
-roomRouter.get("/availableRoom", (req, res) => roomController.getAvailableRoom(req, res));
+roomRouter.get("/availableRoom", validate({ query: availableRoomQuery }), (req, res) =>
+  roomController.getAvailableRoom(req, res)
+);
 
-roomRouter.get("/roomDetails/:id", requireAuth, (req, res) =>
-  roomController.getRoomDetails(req, res)
+roomRouter.get(
+  "/roomDetails/:id",
+  requireAuth,
+  validate({ params: roomIdParam }),
+  (req, res) => roomController.getRoomDetails(req, res)
 );
 
 // The owner is taken from the session, never from a client-supplied cookie.
-roomRouter.post("/", landOwnerAuth, (req, res) => roomController.registerRoom(req, res));
+roomRouter.post("/", landOwnerAuth, validate({ body: createRoomSchema }), (req, res) =>
+  roomController.registerRoom(req, res)
+);
 
 roomRouter.get("/myRoom", landOwnerAuth, (req, res) =>
   roomController.getRoomsByOwnerId(req, res)
 );
 
-roomRouter.delete("/:id", landOwnerAuth, authorize("room"), (req, res) =>
-  roomController.deleteRoom(req, res)
+roomRouter.delete(
+  "/:id",
+  landOwnerAuth,
+  validate({ params: roomIdParam }),
+  authorize("room"),
+  (req, res) => roomController.deleteRoom(req, res)
 );
 
-roomRouter.put("/:id", landOwnerAuth, authorize("room"), (req, res) =>
-  roomController.updateRoom(req, res)
+roomRouter.put(
+  "/:id",
+  landOwnerAuth,
+  validate({ params: roomIdParam, body: updateRoomSchema }),
+  authorize("room"),
+  (req, res) => roomController.updateRoom(req, res)
 );
 
 roomRouter.post(
   "/toggle-room/:roomId",
   landOwnerAuth,
+  validate({ params: roomIdParamAlt }),
   authorize("room", { key: "roomId" }),
   (req, res) => roomController.toggleRoomAssign(req, res)
 );

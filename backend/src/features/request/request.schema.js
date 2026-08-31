@@ -22,4 +22,8 @@ const requestSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+requestSchema.index({ roomId: 1, status: 1 });
+// One application per renter per room.
+requestSchema.index({ renterId: 1, roomId: 1 }, { unique: true });
+
 export default requestSchema;

@@ -2,6 +2,8 @@ import express from "express";
 import RequestController from "./request.controller.js";
 import landOwnerAuth from "../../middleware/landOwners.js";
 import { requireAuth, requireRole, authorize } from "../../middleware/authorize.js";
+import validate from "../../middleware/validate.js";
+import { roomIdParam } from "../../validation/schemas.js";
 
 const requestRouter = express.Router();
 const requestController = new RequestController();
@@ -17,15 +19,27 @@ const requestController = new RequestController();
  */
 
 // Apply for / withdraw from a room.
-requestRouter.post("/:id", requireAuth, requireRole("renter"), (req, res) =>
+requestRouter.post(
+  "/:id",
+  requireAuth,
+  requireRole("renter"),
+  validate({ params: roomIdParam }),
+  (req, res) =>
   requestController.toggleRequest(req, res)
 );
 
 // Have I applied for this room?
-requestRouter.get("/users/:id", landOwnerAuth, authorize("room", { key: "id" }), (req, res) =>
+requestRouter.get(
+  "/users/:id",
+  landOwnerAuth,
+  validate({ params: roomIdParam }),
+  authorize("room", { key: "id" }),
+  (req, res) =>
   requestController.getUsers(req, res)
 );
 
-requestRouter.get("/:id", requireAuth, (req, res) => requestController.getRequest(req, res));
+requestRouter.get("/:id", requireAuth, validate({ params: roomIdParam }), (req, res) =>
+  requestController.getRequest(req, res)
+);
 
 export default requestRouter;

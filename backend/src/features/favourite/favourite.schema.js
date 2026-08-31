@@ -18,4 +18,7 @@ const favouriteSchema = new mongoose.Schema(
   }
 );
 
+// Nothing stopped the same room being favourited twice by one user.
+favouriteSchema.index({ userId: 1, roomId: 1 }, { unique: true });
+
 export default favouriteSchema;

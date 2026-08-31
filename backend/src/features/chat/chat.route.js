@@ -1,6 +1,8 @@
 import express from "express";
 import { getMessages, getUnreadCount, markAsRead } from "./chat.controller.js";
 import { requireAuth, authorize } from "../../middleware/authorize.js";
+import validate from "../../middleware/validate.js";
+import { relationIdParam, chatReadSchema } from "../../validation/schemas.js";
 
 const chatRouter = express.Router();
 
@@ -16,6 +18,7 @@ const chatRouter = express.Router();
 chatRouter.get(
   "/:relationId",
   requireAuth,
+  validate({ params: relationIdParam }),
   authorize("relationship", { from: "params", key: "relationId" }),
   getMessages
 );
@@ -23,6 +26,7 @@ chatRouter.get(
 chatRouter.get(
   "/unread/:relationId",
   requireAuth,
+  validate({ params: relationIdParam }),
   authorize("relationship", { from: "params", key: "relationId" }),
   getUnreadCount
 );
@@ -30,6 +34,7 @@ chatRouter.get(
 chatRouter.post(
   "/read",
   requireAuth,
+  validate({ body: chatReadSchema }),
   authorize("relationship", { from: "body", key: "relationId" }),
   markAsRead
 );

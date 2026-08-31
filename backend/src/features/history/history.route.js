@@ -1,6 +1,13 @@
 import express from "express";
 import HistoryController from "./history.controller.js";
 import { requireAuth, authorize } from "../../middleware/authorize.js";
+import validate from "../../middleware/validate.js";
+import {
+  createHistorySchema,
+  updateHistorySchema,
+  relationIdParam,
+  historyIdParam,
+} from "../../validation/schemas.js";
 
 const historyRouter = express.Router();
 const historyController = new HistoryController();
@@ -21,6 +28,7 @@ const historyController = new HistoryController();
 historyRouter.post(
   "/:relationId",
   requireAuth,
+  validate({ params: relationIdParam, body: createHistorySchema }),
   authorize("relationship", { from: "params", key: "relationId", parties: ["owner"] }),
   (req, res) => historyController.createHistory(req, res)
 );
@@ -29,6 +37,7 @@ historyRouter.post(
 historyRouter.get(
   "/:relationId",
   requireAuth,
+  validate({ params: relationIdParam }),
   authorize("relationship", { from: "params", key: "relationId" }),
   (req, res) => historyController.getRenterHistory(req, res)
 );
@@ -37,6 +46,7 @@ historyRouter.get(
 historyRouter.patch(
   "/:historyId",
   requireAuth,
+  validate({ params: historyIdParam, body: updateHistorySchema }),
   authorize("history", { from: "params", key: "historyId", parties: ["owner"] }),
   (req, res) => historyController.updateRenterHistory(req, res)
 );
@@ -45,6 +55,7 @@ historyRouter.patch(
 historyRouter.delete(
   "/:historyId",
   requireAuth,
+  validate({ params: historyIdParam }),
   authorize("history", { from: "params", key: "historyId", parties: ["owner"] }),
   (req, res) => historyController.delelteHistory(req, res)
 );

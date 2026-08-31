@@ -1,6 +1,8 @@
 import express from "express";
 import jwtAuth from "../../middleware/jwtAuth.js";
 import NotificationController from "./notification.controller.js";
+import validate from "../../middleware/validate.js";
+import { notificationIdParam } from "../../validation/schemas.js";
 
 const notificationRouter = express.Router();
 
@@ -22,7 +24,7 @@ notificationRouter.patch("/read-all", jwtAuth, (req, res) => {
 });
 
 // Mark a notification as read
-notificationRouter.patch("/:id/read", jwtAuth, (req, res) => {
+notificationRouter.patch("/:id/read", jwtAuth, validate({ params: notificationIdParam }), (req, res) => {
     notificationController.markAsRead(req, res);
 });
 

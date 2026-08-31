@@ -2,6 +2,15 @@ import express from "express";
 import RelationshipController from "./relationship.controller.js";
 import landOwnerAuth from "../../middleware/landOwners.js";
 import { requireAuth, authorize, ownsRoomInBody } from "../../middleware/authorize.js";
+import validate from "../../middleware/validate.js";
+import {
+  acceptSchema,
+  rejectSchema,
+  roomIdBody,
+  relationIdBody,
+  objectId,
+} from "../../validation/schemas.js";
+import { z } from "zod";
 
 const relationshipRouter = express.Router();
 const relationshipController = new RelationshipController();
@@ -22,19 +31,39 @@ const relationshipController = new RelationshipController();
 
 // --- Landlord side: must own the ROOM being acted on -------------------------
 
-relationshipRouter.post("/accept", landOwnerAuth, ownsRoomInBody(), (req, res) =>
+relationshipRouter.post(
+  "/accept",
+  landOwnerAuth,
+  validate({ body: acceptSchema }),
+  ownsRoomInBody(),
+  (req, res) =>
   relationshipController.accept(req, res)
 );
 
-relationshipRouter.post("/reject", landOwnerAuth, ownsRoomInBody(), (req, res) =>
+relationshipRouter.post(
+  "/reject",
+  landOwnerAuth,
+  validate({ body: rejectSchema }),
+  ownsRoomInBody(),
+  (req, res) =>
   relationshipController.rejectRequest(req, res)
 );
 
-relationshipRouter.post("/isRelationship", landOwnerAuth, ownsRoomInBody(), (req, res) =>
+relationshipRouter.post(
+  "/isRelationship",
+  landOwnerAuth,
+  validate({ body: roomIdBody }),
+  ownsRoomInBody(),
+  (req, res) =>
   relationshipController.isRoomAvailable(req, res)
 );
 
-relationshipRouter.post("/relationByRoomId", landOwnerAuth, ownsRoomInBody(), (req, res) =>
+relationshipRouter.post(
+  "/relationByRoomId",
+  landOwnerAuth,
+  validate({ body: roomIdBody }),
+  ownsRoomInBody(),
+  (req, res) =>
   relationshipController.relationByRoomId(req, res)
 );
 
@@ -43,6 +72,7 @@ relationshipRouter.post("/relationByRoomId", landOwnerAuth, ownsRoomInBody(), (r
 relationshipRouter.post(
   "/removeRenter",
   landOwnerAuth,
+  validate({ body: relationIdBody }),
   authorize("relationship", { from: "body", key: "relationId", parties: ["owner"] }),
   (req, res) => relationshipController.removeRenter(req, res)
 );
@@ -50,6 +80,7 @@ relationshipRouter.post(
 relationshipRouter.delete(
   "/deleteRenter/:id",
   landOwnerAuth,
+  validate({ params: z.object({ id: objectId }) }),
   authorize("relationship", { from: "params", key: "id", parties: ["owner"] }),
   (req, res) => relationshipController.deleteRenter(req, res)
 );
@@ -57,6 +88,7 @@ relationshipRouter.delete(
 relationshipRouter.post(
   "/isArchieve",
   landOwnerAuth,
+  validate({ body: relationIdBody }),
   authorize("relationship", { from: "body", key: "relationId", parties: ["owner"] }),
   (req, res) => relationshipController.isArchieve(req, res)
 );
