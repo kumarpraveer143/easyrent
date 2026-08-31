@@ -3,9 +3,12 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "dev": "nodemon index.js",
     "go": "nodemon index.js",
-    "start": "node index.js"
+    "seed": "node tests/seed.mjs",
+    "test:proof": "node tests/security.proof.mjs && node tests/validation.proof.mjs",
+    "test": "npm run test:proof"
   },
   "keywords": [],
   "author": "",
