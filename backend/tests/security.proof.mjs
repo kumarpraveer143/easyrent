@@ -64,6 +64,31 @@ const loginA = await req("POST", "/users/login", { body: { email: landlordA.emai
 const loginB = await req("POST", "/users/login", { body: { email: landlordB.email, password: landlordB.password } });
 const loginC = await req("POST", "/users/login", { body: { email: renterC.email, password: renterC.password } });
 
+// The auth rate limiter (20 per 15 min) is in-memory, so running these suites
+// repeatedly against one server WILL trip it. Say so plainly rather than
+// failing later with a confusing type error.
+for (const [who, r] of [["A", loginA], ["B", loginB], ["C", loginC]]) {
+  if (r.status === 429) {
+    console.error(
+      [
+        "",
+        `Rate limited while signing in as ${who}.`,
+        "That is authLimiter doing its job \u2014 it allows 20 auth attempts per",
+        "15 minutes, and these suites use several per run. Restart the API to",
+        "clear the in-memory counter, then re-run.",
+        "",
+      ].join("\n")
+    );
+    process.exit(2);
+  }
+  if (r.status !== 200) {
+    console.error(
+      `\nCould not sign in as ${who} (status ${r.status}). Is the API up?\n`
+    );
+    process.exit(2);
+  }
+}
+
 const A = jar(loginA.cookies);
 const B = jar(loginB.cookies);
 const C = jar(loginC.cookies);
@@ -112,9 +137,10 @@ check("a forged userId cookie with no token -> 401", spoof.status === 401,
 const spoofRooms = await req("GET", "/rooms/myRoom", {
   cookie: `${B}; userId=${loginA.json?.user?._id}`,
 });
+const spoofed = Array.isArray(spoofRooms.json?.message) ? spoofRooms.json.message : [];
 check("landlord B cannot read A's rooms by forging userId",
-  !(spoofRooms.json?.message ?? []).some((r) => r._id === roomAId),
-  `leaked ${(spoofRooms.json?.message ?? []).length} rooms`);
+  !spoofed.some((r) => r._id === roomAId),
+  `leaked ${spoofed.length} rooms`);
 
 console.log("\n=== SEC-06  a landowner must not act on another's room ===");
 check("B cannot DELETE A's room",

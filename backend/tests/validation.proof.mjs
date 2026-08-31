@@ -32,6 +32,25 @@ const base = {
   homeAddress: { street: "12 Test Road", city: "Bengaluru", state: "Karnataka", zipCode: "560001" },
 };
 
+// The auth limiter (20 per 15 min, in-memory) will trip if these suites are
+// run repeatedly against one server. Detect it up front rather than
+// reporting 25 confusing failures.
+{
+  const probe = await req("POST", "/users/register", { body: { ...base, email: `probe${ts}@example.com` } });
+  if (probe.status === 429) {
+    console.error(
+      [
+        "",
+        "Rate limited before the suite could start.",
+        "That is authLimiter working \u2014 20 auth attempts per 15 minutes.",
+        "Restart the API to clear the in-memory counter, then re-run.",
+        "",
+      ].join("\n")
+    );
+    process.exit(2);
+  }
+}
+
 console.log("=== signup field validation ===");
 
 const cases = [
