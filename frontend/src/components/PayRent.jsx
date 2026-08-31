@@ -1,88 +1,82 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import { toast } from 'react-toastify';
-import { FaCreditCard, FaLock, FaMoneyBillWave } from 'react-icons/fa';
-import { SiStripe } from 'react-icons/si';
+import React, { useState } from "react";
+import axios from "axios";
+import { Card, CardBody, Button, Alert, money } from "./UI";
+import { useStripe } from "../contexts/StripeContext";
 
-const PayRent = ({ relationId, rentAmount, renterId, ownerId, roomId }) => {
-    const [loading, setLoading] = useState(false);
+/**
+ * The request now carries ONLY `relationId`.
+ *
+ * It used to post `amount`, `renterId`, `ownerId` and `roomId` from the
+ * browser, and the server took the amount at face value — so a tenant could
+ * pay ₹1 against a ₹15,000 room (SEC-04). The amount is now looked up
+ * server-side from the unit's rent; `rentAmount` here is display only.
+ */
+export default function PayRent({ relationId, rentAmount }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const { stripeEnabled } = useStripe();
 
-    const handlePayment = async () => {
-        setLoading(true);
-        try {
-            // Create checkout session
-            const response = await axios.post(
-                `${import.meta.env.VITE_API_URL}/payment/create-checkout-session`,
-                {
-                    relationId,
-                    amount: rentAmount,
-                    renterId,
-                    ownerId,
-                    roomId,
-                },
-                { withCredentials: true }
-            );
+  const handlePayment = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/payment/create-checkout-session`,
+        { relationId },
+        { withCredentials: true }
+      );
+      if (res.data?.url) {
+        window.location.href = res.data.url;
+      } else {
+        setError("We couldn't start the payment. Try again in a moment.");
+      }
+    } catch (err) {
+      setError(
+        err.response?.data?.message ??
+          "We couldn't start the payment. Try again in a moment."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
-            if (response.data.success) {
-                // Redirect to Stripe checkout
-                window.location.href = response.data.url;
-            } else {
-                toast.error('Failed to initiate payment');
-            }
-        } catch (error) {
-            console.error('Payment error:', error);
-            const errorMessage = error.response?.data?.message || error.message || 'Failed to process payment';
-            toast.error(errorMessage);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    return (
-        <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl p-6 border-2 border-purple-200">
-            <div className="flex items-center justify-between mb-4">
-                <div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-1">Pay Rent Online</h3>
-                    <p className="text-gray-600 text-sm">Secure payment powered by Stripe</p>
-                </div>
-                <SiStripe className="text-5xl text-purple-600" />
-            </div>
-
-            <div className="bg-white rounded-xl p-4 mb-4">
-                <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Amount Due</span>
-                    <span className="text-3xl font-bold text-purple-600">₹{rentAmount.toLocaleString()}</span>
-                </div>
-            </div>
-
-            <button
-                onClick={handlePayment}
-                disabled={loading}
-                className={`w-full py-4 px-6 rounded-xl font-bold text-white transition-all duration-300 flex items-center justify-center space-x-3 ${loading
-                        ? 'bg-gray-400 cursor-not-allowed'
-                        : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 transform hover:scale-105 shadow-lg'
-                    }`}
-            >
-                {loading ? (
-                    <>
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                        <span>Processing...</span>
-                    </>
-                ) : (
-                    <>
-                        <FaCreditCard className="h-5 w-5" />
-                        <span>Pay with Stripe</span>
-                        <FaLock className="h-4 w-4" />
-                    </>
-                )}
-            </button>
-
-            <div className="mt-4 flex items-center justify-center space-x-2 text-sm text-gray-500">
-                <FaLock className="h-3 w-3" />
-                <span>Secure payment processing</span>
-            </div>
+  return (
+    <Card>
+      <CardBody>
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h2 className="text-body font-semibold text-ink">Pay rent</h2>
+            <p className="mt-0.5 text-label text-ink-faint">
+              {stripeEnabled
+                ? "Card payment, handled by Stripe."
+                : "Online payment isn't switched on yet."}
+            </p>
+          </div>
+          <p className="tabular text-display leading-none text-ink">{money(rentAmount)}</p>
         </div>
-    );
-};
 
-export default PayRent;
+        {error && (
+          <Alert tone="danger" className="mt-4">
+            {error}
+          </Alert>
+        )}
+
+        {stripeEnabled ? (
+          <Button
+            variant="primary"
+            className="mt-4 w-full"
+            loading={loading}
+            onClick={handlePayment}
+          >
+            {loading ? "Opening payment…" : `Pay ${money(rentAmount)}`}
+          </Button>
+        ) : (
+          <Alert tone="info" className="mt-4">
+            Pay your landlord directly for now — they&rsquo;ll record it against your
+            tenancy and it will appear in your payment history.
+          </Alert>
+        )}
+      </CardBody>
+    </Card>
+  );
+}

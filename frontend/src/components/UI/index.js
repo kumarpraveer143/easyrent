@@ -8,6 +8,7 @@
  */
 
 export { default as Button } from "./Button.jsx";
+export { default as ThemeSwitcher } from "./ThemeSwitcher.jsx";
 export { Input, Select, Textarea } from "./Field.jsx";
 export { default as Card, CardHeader, CardBody } from "./Card.jsx";
 export { default as Badge } from "./Badge.jsx";

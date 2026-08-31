@@ -1,8 +1,23 @@
+/* Inter, self-hosted.
+   The design system has always NAMED Inter in its font stack, but nothing ever
+   loaded it — so every screen silently fell back to Segoe UI on Windows and
+   Roboto on Android, which is why type read thinner and less even than
+   intended. Self-hosted rather than Google Fonts: no third-party request, no
+   flash of unstyled text from a CDN, nothing to fail offline. */
+@import "@fontsource-variable/inter";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  html {
+    /* Inter's own metrics are optimised at these settings; without them the
+       lowercase reads slightly loose at 15px. */
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    text-rendering: optimizeLegibility;
+  }
+
   body {
     @apply bg-surface-sunken text-ink-muted font-sans text-body antialiased;
   }
@@ -36,6 +51,20 @@
            focus:rounded focus:border focus:border-line-strong focus:bg-surface
            focus:px-3 focus:py-2 focus:text-label focus:text-ink;
   }
+}
+
+/*
+ * Kill every colour transition while the theme is switching.
+ *
+ * Components use `transition-colors` for hover, which is right — but on a theme
+ * swap EVERY element animates its background and text independently, so for
+ * ~150ms you see dark surfaces with dark text on them. ThemeProvider sets this
+ * attribute for one frame around the change.
+ */
+[data-theme-switching] *,
+[data-theme-switching] *::before,
+[data-theme-switching] *::after {
+  transition: none !important;
 }
 
 .developer {

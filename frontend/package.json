@@ -7,9 +7,12 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:contrast": "node tests/contrast.proof.mjs",
+    "test": "npm run test:contrast"
   },
   "dependencies": {
+    "@fontsource-variable/inter": "^5.3.0",
     "@reduxjs/toolkit": "^2.3.0",
     "@stripe/react-stripe-js": "^5.4.0",
     "@stripe/stripe-js": "^8.5.2",

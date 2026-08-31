@@ -10,7 +10,7 @@ import React from "react";
 const VARIANTS = {
   // Solid ink. The one primary action on a screen.
   primary:
-    "bg-ink text-white border border-ink hover:bg-black disabled:bg-ink/40 disabled:border-transparent",
+    "bg-ink text-ink-contrast border border-ink hover:bg-ink/90 disabled:bg-ink/40 disabled:border-transparent",
   // Bordered. Everything else that is still an action.
   secondary:
     "bg-surface text-ink border border-line-strong hover:bg-surface-raised disabled:text-ink-faint",

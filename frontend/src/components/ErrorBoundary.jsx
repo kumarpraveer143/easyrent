@@ -42,7 +42,7 @@ export default class ErrorBoundary extends React.Component {
             <button
               type="button"
               onClick={this.handleReset}
-              className="inline-flex h-10 items-center justify-center rounded border border-ink bg-ink px-4 text-body font-medium text-white transition-colors hover:bg-black"
+              className="inline-flex h-10 items-center justify-center rounded border border-ink bg-ink px-4 text-body font-medium text-ink-contrast transition-colors hover:bg-ink/90"
             >
               Try again
             </button>

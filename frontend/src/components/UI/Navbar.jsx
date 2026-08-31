@@ -10,6 +10,7 @@ import {
 import { toast } from "react-toastify";
 import NotificationDropdown from "./NotificationDropdown";
 import Button from "./Button";
+import ThemeSwitcher from "./ThemeSwitcher";
 
 /**
  * Navigation is <Link>, not <button onClick={navigate}>.
@@ -136,7 +137,7 @@ export default function Navbar() {
           <path d="M8 15a2 2 0 0 0 4 0" stroke="currentColor" strokeWidth="1.4" />
         </svg>
         {unreadCount > 0 && (
-          <span className="tabular absolute right-0.5 top-0.5 min-w-[16px] rounded-full bg-danger px-1 text-[10px] font-semibold leading-4 text-white">
+          <span className="tabular absolute right-0.5 top-0.5 min-w-[16px] rounded-full bg-danger px-1 text-[10px] font-semibold leading-4 text-ink-contrast">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
@@ -169,6 +170,7 @@ export default function Navbar() {
         </div>
 
         <div className="hidden items-center gap-2 md:flex">
+          <ThemeSwitcher />
           {user ? (
             <>
               {bell}
@@ -192,7 +194,7 @@ export default function Navbar() {
               </Link>
               <Link
                 to="/signup"
-                className="inline-flex h-9 items-center rounded border border-ink bg-ink px-3 text-body font-medium text-white transition-colors hover:bg-black"
+                className="inline-flex h-9 items-center rounded border border-ink bg-ink px-3 text-body font-medium text-ink-contrast transition-colors hover:bg-ink/90"
               >
                 Sign up
               </Link>
@@ -201,6 +203,7 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-1 md:hidden">
+          <ThemeSwitcher />
           {user && bell}
           <button
             type="button"
@@ -263,7 +266,7 @@ export default function Navbar() {
                   <Link
                     to="/signup"
                     onClick={() => setIsMenuOpen(false)}
-                    className="inline-flex h-9 flex-1 items-center justify-center rounded border border-ink bg-ink text-body font-medium text-white"
+                    className="inline-flex h-9 flex-1 items-center justify-center rounded border border-ink bg-ink text-body font-medium text-ink-contrast"
                   >
                     Sign up
                   </Link>

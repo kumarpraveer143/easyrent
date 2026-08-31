@@ -1,167 +1,136 @@
-import React, { useState, useEffect, useRef } from "react";
-import { FaPaperPlane, FaTimes } from "react-icons/fa";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import { getSocket } from "../services/socket.service";
+import { Button, Input, Alert } from "./UI";
 
-const Chat = ({ relationId, senderId, onClose, recipientName }) => {
-    const [messages, setMessages] = useState([]);
-    const [newMessage, setNewMessage] = useState("");
-    const messagesEndRef = useRef(null);
-    const socket = getSocket();
+const API = import.meta.env.VITE_API_URL;
 
-    useEffect(() => {
-        // Join the chat room
-        if (socket && relationId) {
-            console.log("Joining chat room:", relationId);
-            socket.emit("join_chat", relationId);
+/**
+ * Landlord ↔ tenant chat.
+ *
+ * `currentUserId` is used only to decide which side of the thread a message
+ * sits on. It is NOT sent to the server any more: the socket derives the
+ * sender from the signed JWT, because it used to accept whatever `senderId`
+ * the payload claimed, letting anyone post as anyone (SEC-07).
+ */
+export default function Chat({ relationId, currentUserId, recipientName, onClose }) {
+  const [messages, setMessages] = useState([]);
+  const [draft, setDraft] = useState("");
+  const [error, setError] = useState("");
+  const endRef = useRef(null);
+  const socket = getSocket();
 
-            const handleReceiveMessage = (message) => {
-                console.log("Received message:", message);
-                setMessages((prev) => [...prev, message]);
-            };
+  useEffect(() => {
+    if (!socket || !relationId) return;
 
-            // Remove any existing listener to avoid duplicates
-            socket.off("receive_message");
-            // Listen for incoming messages
-            socket.on("receive_message", handleReceiveMessage);
+    socket.emit("join_chat", relationId);
 
-            return () => {
-                socket.off("receive_message", handleReceiveMessage);
-            };
-        } else {
-            console.log("Socket or relationId missing:", { socket: !!socket, relationId });
-        }
-    }, [socket, relationId]);
+    const onReceive = (message) => setMessages((prev) => [...prev, message]);
+    socket.on("receive_message", onReceive);
+    return () => socket.off("receive_message", onReceive);
+  }, [socket, relationId]);
 
-    useEffect(() => {
-        // Fetch chat history
-        const fetchMessages = async () => {
-            try {
-                console.log("Fetching messages for relationId:", relationId);
-                const response = await axios.get(
-                    `${import.meta.env.VITE_API_URL}/chat/${relationId}`,
-                    { withCredentials: true }
-                );
-                console.log("Fetched messages:", response.data.messages);
-                setMessages(response.data.messages);
+  const load = useCallback(async () => {
+    if (!relationId) return;
+    try {
+      const res = await axios.get(`${API}/chat/${relationId}`, { withCredentials: true });
+      setMessages(res.data.messages ?? []);
+      // The server takes the reader from the session; no userId in the body.
+      await axios.post(`${API}/chat/read`, { relationId }, { withCredentials: true });
+    } catch {
+      setError("Couldn't load this conversation.");
+    }
+  }, [relationId]);
 
-                // Mark messages as read
-                await axios.post(
-                    `${import.meta.env.VITE_API_URL}/chat/read`,
-                    { relationId, userId: senderId },
-                    { withCredentials: true }
-                );
-            } catch (error) {
-                console.error("Error fetching messages:", error);
-            }
-        };
+  useEffect(() => {
+    load();
+  }, [load]);
 
-        if (relationId) {
-            fetchMessages();
-        }
-    }, [relationId]);
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
+  const send = (e) => {
+    e.preventDefault();
+    const text = draft.trim();
+    if (!text || !socket) return;
+    socket.emit("send_message", { relationId, message: text });
+    setDraft("");
+  };
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
+  return (
+    <div
+      role="dialog"
+      aria-label={`Conversation with ${recipientName ?? "the other party"}`}
+      className="fixed bottom-4 right-4 z-50 flex h-[28rem] w-[22rem] max-w-[calc(100vw-2rem)] flex-col rounded border border-line bg-surface shadow-overlay"
+    >
+      <div className="flex items-center justify-between border-b border-line px-3 py-2.5">
+        <p className="truncate text-body font-semibold text-ink">
+          {recipientName ?? "Messages"}
+        </p>
+        <Button variant="ghost" size="sm" onClick={onClose} aria-label="Close conversation">
+          Close
+        </Button>
+      </div>
 
-    const handleSendMessage = (e) => {
-        e.preventDefault();
-        if (!newMessage.trim() || !socket) return;
+      <div className="flex-1 overflow-y-auto px-3 py-3">
+        {error && <Alert tone="danger">{error}</Alert>}
 
-        const messageData = {
-            relationId,
-            senderId,
-            message: newMessage,
-        };
+        {!error && messages.length === 0 && (
+          <p className="py-10 text-center text-body text-ink-faint">
+            No messages yet. Say hello.
+          </p>
+        )}
 
-        socket.emit("send_message", messageData);
-        setNewMessage("");
-    };
-
-    return (
-        <div className="fixed bottom-4 right-4 w-96 h-[500px] bg-white rounded-2xl shadow-2xl flex flex-col border border-gray-200 z-50 overflow-hidden animate-slide-up">
-            {/* Header */}
-            <div className="bg-gradient-to-r from-primary-600 to-indigo-600 p-4 flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                        <span className="text-white font-bold text-lg">
-                            {recipientName ? recipientName.charAt(0).toUpperCase() : "C"}
-                        </span>
-                    </div>
-                    <div>
-                        <h3 className="text-white font-bold text-lg">{recipientName || "Chat"}</h3>
-                        <p className="text-blue-100 text-xs flex items-center">
-                            <span className="w-2 h-2 bg-green-400 rounded-full mr-1"></span>
-                            Online
-                        </p>
-                    </div>
-                </div>
-                <button
-                    onClick={onClose}
-                    className="text-white/80 hover:text-white hover:bg-white/10 p-2 rounded-full transition-all"
+        <ul className="flex flex-col gap-2">
+          {messages.map((msg, i) => {
+            const mine = String(msg.senderId) === String(currentUserId);
+            return (
+              <li
+                key={msg._id ?? i}
+                className={mine ? "flex justify-end" : "flex justify-start"}
+              >
+                <div
+                  className={[
+                    "max-w-[80%] rounded border px-2.5 py-1.5",
+                    mine
+                      ? "border-ink bg-ink text-ink-contrast"
+                      : "border-line bg-surface-raised text-ink",
+                  ].join(" ")}
                 >
-                    <FaTimes className="w-5 h-5" />
-                </button>
-            </div>
-
-            {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-                {messages.map((msg, index) => {
-                    const isMyMessage = msg.senderId === senderId;
-                    return (
-                        <div
-                            key={index}
-                            className={`flex ${isMyMessage ? "justify-end" : "justify-start"}`}
-                        >
-                            <div
-                                className={`max-w-[80%] p-3 rounded-2xl ${isMyMessage
-                                    ? "bg-primary-600 text-white rounded-br-none"
-                                    : "bg-white text-gray-800 border border-gray-200 rounded-bl-none shadow-sm"
-                                    }`}
-                            >
-                                <p className="text-sm">{msg.message}</p>
-                                <p
-                                    className={`text-[10px] mt-1 text-right ${isMyMessage ? "text-blue-100" : "text-gray-400"
-                                        }`}
-                                >
-                                    {new Date(msg.createdAt).toLocaleTimeString([], {
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                    })}
-                                </p>
-                            </div>
-                        </div>
-                    );
-                })}
-                <div ref={messagesEndRef} />
-            </div>
-
-            {/* Input Area */}
-            <form onSubmit={handleSendMessage} className="p-4 bg-white border-t border-gray-100">
-                <div className="flex items-center space-x-2 bg-gray-50 rounded-full px-4 py-2 border border-gray-200 focus-within:border-primary-300 focus-within:ring-2 focus-within:ring-primary-100 transition-all">
-                    <input
-                        type="text"
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        placeholder="Type a message..."
-                        className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-gray-700 placeholder-gray-400"
-                    />
-                    <button
-                        type="submit"
-                        disabled={!newMessage.trim()}
-                        className="p-2 bg-primary-600 text-white rounded-full hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105"
-                    >
-                        <FaPaperPlane className="w-4 h-4" />
-                    </button>
+                  <p className="text-body">{msg.message}</p>
+                  <p
+                    className={[
+                      "tabular mt-0.5 text-right text-[11px]",
+                      mine ? "text-ink-contrast/70" : "text-ink-faint",
+                    ].join(" ")}
+                  >
+                    {new Date(msg.createdAt).toLocaleTimeString([], {
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })}
+                  </p>
                 </div>
-            </form>
-        </div>
-    );
-};
+              </li>
+            );
+          })}
+        </ul>
+        <div ref={endRef} />
+      </div>
 
-export default Chat;
+      <form onSubmit={send} className="flex items-end gap-2 border-t border-line p-2.5">
+        <div className="flex-1">
+          <Input
+            aria-label="Message"
+            placeholder="Type a message…"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+          />
+        </div>
+        <Button type="submit" variant="primary" disabled={!draft.trim()}>
+          Send
+        </Button>
+      </form>
+    </div>
+  );
+}

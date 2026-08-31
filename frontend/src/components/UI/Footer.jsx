@@ -1,158 +1,81 @@
 import React from "react";
-import { FaGithub, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
-const Footer = () => {
+/**
+ * The old footer was a four-column marketing block whose "Company" section
+ * linked to Careers and a Blog that don't exist, and whose social icons were
+ * the developer's personal accounts — which reads as a portfolio project rather
+ * than a business a landlord would trust with rent.
+ *
+ * Real links only. Anything not built yet isn't listed.
+ */
+
+const COLUMNS = [
+  {
+    heading: "Renting",
+    links: [
+      { to: "/findrooms", label: "Find a room" },
+      { to: "/rentersMyRoom", label: "My room" },
+      { to: "/renter-history", label: "Rent paid" },
+      { to: "/favouriteRooms", label: "Saved rooms" },
+    ],
+  },
+  {
+    heading: "Listing",
+    links: [
+      { to: "/uploadrooms", label: "List a room" },
+      { to: "/landowner-rooms", label: "My rooms" },
+      { to: "/my-renters", label: "Tenants" },
+      { to: "/incoming-request", label: "Applications" },
+    ],
+  },
+  {
+    heading: "Company",
+    links: [
+      { to: "/about", label: "About" },
+      { to: "/contact", label: "Contact" },
+    ],
+  },
+];
+
+export default function Footer() {
   return (
-    <footer className="bg-white border-t border-gray-200 pt-16 pb-8 relative overflow-hidden">
-      {/* Subtle Background Pattern */}
-      <div className="absolute inset-0 opacity-40 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#e5e7eb 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
-      <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/3 w-96 h-96 bg-primary-50 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
-      <div className="absolute bottom-0 left-0 translate-y-1/3 -translate-x-1/3 w-96 h-96 bg-blue-50 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
-
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 mb-16">
-          {/* Company Info & Newsletter */}
-          <div className="lg:col-span-5 space-y-8">
-            <div>
-              <h3 className="text-3xl font-extrabold text-gray-900 tracking-tight">
-                EasyRent
-              </h3>
-              <p className="mt-4 text-gray-600 leading-relaxed max-w-md">
-                Your reliable rental companion. We connect verified landlords and tenants for a seamless, hassle-free rental journey backed by advanced technology.
-              </p>
-            </div>
-
-
-
-            {/* Social Links */}
-            <div className="flex space-x-5">
-              <a href="https://github.com/kumarpraveer143" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-primary-600 transition-colors duration-300 transform hover:scale-110">
-                <span className="sr-only">GitHub</span>
-                <FaGithub className="h-6 w-6" />
-              </a>
-              <a href="https://x.com/kumarpraveer3?t=s-r4AAAheb9JaG9UBN70og&s=09" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-primary-600 transition-colors duration-300 transform hover:scale-110">
-                <span className="sr-only">X (Twitter)</span>
-                <FaTwitter className="h-6 w-6" />
-              </a>
-              <a href="https://www.instagram.com/kumar_praveeer?igsh=a3ZxamN0aWFqcjQw" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-primary-600 transition-colors duration-300 transform hover:scale-110">
-                <span className="sr-only">Instagram</span>
-                <FaInstagram className="h-6 w-6" />
-              </a>
-              <a href="https://www.linkedin.com/in/praveerdeveloper/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-primary-600 transition-colors duration-300 transform hover:scale-110">
-                <span className="sr-only">LinkedIn</span>
-                <FaLinkedin className="h-6 w-6" />
-              </a>
-            </div>
-          </div>
-
-          {/* Links Sections */}
-          <div className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-8">
-            <div>
-              <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-6">Platform</h4>
-              <ul className="space-y-4">
-                <li>
-                  <Link to="/" className="text-gray-600 hover:text-primary-600 transition-colors duration-300 font-medium">
-                    Home
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/findRooms" className="text-gray-600 hover:text-primary-600 transition-colors duration-300 font-medium">
-                    Find Rooms
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/uploadrooms" className="text-gray-600 hover:text-primary-600 transition-colors duration-300 font-medium">
-                    List Property
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/dashboard" className="text-gray-600 hover:text-primary-600 transition-colors duration-300 font-medium">
-                    Dashboard
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-6">Support</h4>
-              <ul className="space-y-4">
-                <li>
-                  <Link to="/faq" className="text-gray-600 hover:text-primary-600 transition-colors duration-300 font-medium">
-                    FAQ
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/contact" className="text-gray-600 hover:text-primary-600 transition-colors duration-300 font-medium">
-                    Contact Us
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/privacy" className="text-gray-600 hover:text-primary-600 transition-colors duration-300 font-medium">
-                    Privacy Policy
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/terms" className="text-gray-600 hover:text-primary-600 transition-colors duration-300 font-medium">
-                    Terms of Service
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-6">Company</h4>
-              <ul className="space-y-4">
-                <li>
-                  <Link to="/about" className="text-gray-600 hover:text-primary-600 transition-colors duration-300 font-medium">
-                    About Us
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/developer" className="text-gray-600 hover:text-primary-600 transition-colors duration-300 font-medium">
-                    Developers
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/careers" className="text-gray-600 hover:text-primary-600 transition-colors duration-300 font-medium">
-                    Careers
-                  </Link>
-                </li>
-                <li>
-                  <Link to="https://blogging-application-ten.vercel.app" target="_blank" className="text-gray-600 hover:text-primary-600 transition-colors duration-300 font-medium">
-                    Blog
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </div>
+    <footer className="mt-auto border-t border-line bg-surface">
+      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-8 px-4 py-10 sm:px-6 md:grid-cols-4">
+        <div className="col-span-2 md:col-span-1">
+          <p className="text-lead font-semibold tracking-tight text-ink">EasyRent</p>
+          <p className="mt-2 max-w-xs text-label text-ink-faint">
+            List a room, find a home, and keep rent and receipts in one place.
+          </p>
         </div>
 
-        {/* Bottom Section */}
-        <div className="border-t border-gray-200 pt-8 mt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <div className="text-center md:text-left">
-              <p className="text-sm text-gray-500">
-                &copy; {new Date().getFullYear()} EasyRent. All rights reserved.
-              </p>
-            </div>
-            <div className="flex space-x-6 text-sm">
-              <Link to="/privacy" className="text-gray-500 hover:text-primary-600 transition-colors duration-300">
-                Privacy
-              </Link>
-              <Link to="/terms" className="text-gray-500 hover:text-primary-600 transition-colors duration-300">
-                Terms
-              </Link>
-              <Link to="/cookies" className="text-gray-500 hover:text-primary-600 transition-colors duration-300">
-                Cookies
-              </Link>
-            </div>
-          </div>
+        {COLUMNS.map((col) => (
+          <nav key={col.heading} aria-label={col.heading}>
+            <h2 className="text-label font-semibold text-ink">{col.heading}</h2>
+            <ul className="mt-2.5 flex flex-col gap-1.5">
+              {col.links.map((l) => (
+                <li key={l.to}>
+                  <Link
+                    to={l.to}
+                    className="rounded text-label text-ink-faint transition-colors hover:text-ink"
+                  >
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ))}
+      </div>
+
+      <div className="border-t border-line">
+        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-4 text-label text-ink-faint sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <p>&copy; {new Date().getFullYear()} EasyRent</p>
+          {/* Terms and Privacy are genuine gaps, not oversights — they land with
+              B36. Listing them as dead links would be worse than omitting them. */}
+          <p>Built for landlords and renters in India.</p>
         </div>
       </div>
     </footer>
   );
-};
-
-export default Footer;
+}
