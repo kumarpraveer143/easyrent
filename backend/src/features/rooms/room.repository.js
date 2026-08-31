@@ -1,7 +1,5 @@
-import RoomSchema from "./room.schema.js";
 import mongoose from "mongoose";
-
-const RoomModel = mongoose.model("Room", RoomSchema);
+import { Room as RoomModel } from "../../models/index.js";
 
 class RoomRepository {
   async getRoomDetails(id) {
@@ -86,7 +84,7 @@ class RoomRepository {
 
   //delete room by id
   async deleteRoom(id) {
-    return await RoomModel.findOneAndDelete(id);
+    return await RoomModel.findOneAndDelete({ _id: id });
   }
 
   //get total count of available rooms

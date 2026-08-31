@@ -1,14 +1,14 @@
-import mongoose from 'mongoose';
+import { History, Relationship } from '../../models/index.js';
 
 class PaymentRepository {
     constructor() {
-        this.historyModel = mongoose.model('History');
+        this.historyModel = History;
     }
 
     async getPaymentsByUser(userId) {
         try {
             // Get all relationships for the user
-            const relationships = await mongoose.model('Relation').find({
+            const relationships = await Relationship.find({
                 $or: [{ renterId: userId }, { ownerId: userId }]
             });
 

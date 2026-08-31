@@ -2,6 +2,7 @@ import express from "express";
 import UserController from "./user.controller.js";
 import adminAuth from "../../middleware/adminAuth.js";
 import jwtAuth from "../../middleware/jwtAuth.js";
+import { authLimiter, mailLimiter } from "../../middleware/rateLimit.js";
 
 const userRouter = express.Router();
 const userController = new UserController();
@@ -22,12 +23,12 @@ userRouter.get("/renters-list", adminAuth, (req, res) => {
 });
 
 //route to register user
-userRouter.post("/register", (req, res) => {
+userRouter.post("/register", authLimiter, (req, res) => {
   userController.registerUser(req, res);
 });
 
 //route to login user
-userRouter.post("/login", (req, res) => {
+userRouter.post("/login", authLimiter, (req, res) => {
   userController.loginUser(req, res);
 });
 
@@ -47,18 +48,18 @@ userRouter.delete("/delete/:id", adminAuth, (req, res) => {
 });
 
 //route of forget password
-userRouter.post("/password/forget", (req, res) => {
+userRouter.post("/password/forget", mailLimiter, (req, res) => {
   userController.forgetPassword(req, res);
 });
 
 //route to reset password
-userRouter.post("/password/reset/:token", (req, res) => {
+userRouter.post("/password/reset/:token", authLimiter, (req, res) => {
   userController.resetPassword(req, res);
 });
 
-//route to update password
-userRouter.put("/password/update", (req, res) => {
-  userController.updatePassword(req, res);
-});
+// BUG-11: `updatePassword` was an unfinished stub — it called
+// `this.userRepository(...)` as if the repository were a function, so the
+// route threw on every call — and it carried no auth at all. Removed rather
+// than left exposed; it comes back with the rest of account settings.
 
 export default userRouter;

@@ -1,20 +1,16 @@
-import jwt from "jsonwebtoken";
+import { requireAuth, requireRole } from "./authorize.js";
 
-function adminAuth(req, res, next) {
-  const { token } = req.cookies;
-  let payload;
-  try {
-    payload = jwt.verify(token, process.env.SECRET_KEY);
-  } catch (err) {
-    return res.status(404).send("Only accessed to admin!");
-  }
-
-  // console.log(payload.user.userType);
-  if (payload.user?.userType !== "admin") {
-    return res.status(404).send("Only accessed to admin!");
-  }
-  res.cookie("userData", payload);
-  next();
-}
+/**
+ * Every admin route was unreachable.
+ *
+ * The old check read `payload.user?.userType`, but the login handler signs the
+ * token as `{ id: user._id }` — there is no `user` key on the payload, so the
+ * comparison always failed and all five admin routes returned 404. It also did
+ * `res.cookie("userData", payload)`, writing the raw token payload back to the
+ * browser for no reason.
+ *
+ * Now the role is read from the loaded user document.
+ */
+const adminAuth = [requireAuth, requireRole("admin")];
 
 export default adminAuth;

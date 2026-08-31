@@ -1,6 +1,4 @@
-import RoomSchema from "../rooms/room.schema.js";
-import mongoose from "mongoose";
-const RoomModel = mongoose.model("Room", RoomSchema);
+import { Room as RoomModel } from "../../models/index.js";
 
 class SearchRoomsRepository {
     async findByCityAndState(city, state) {

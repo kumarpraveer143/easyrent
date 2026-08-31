@@ -7,7 +7,7 @@ const HistorySchema = new Schema(
     relationId: {
       type: mongoose.Types.ObjectId,
       required: true,
-      ref: "Relation",
+      ref: "Relationship",
     },
 
     rentPaid: {

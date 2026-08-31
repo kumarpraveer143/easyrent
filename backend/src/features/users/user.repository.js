@@ -1,7 +1,4 @@
-import UserSchema from "./user.schema.js";
-import mongoose from "mongoose";
-
-const userModel = mongoose.model("User", UserSchema);
+import { User as userModel } from "../../models/index.js";
 
 export default class UserRepository {
   //register user repository
@@ -49,7 +46,7 @@ export default class UserRepository {
 
   //delete a particular user
   async deleteUser(_id) {
-    return await userModel.findOneAndDelete(_id);
+    return await userModel.findOneAndDelete({ _id });
   }
 
   //get all the renters only

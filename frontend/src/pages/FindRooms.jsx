@@ -49,8 +49,13 @@ export default function FindRooms() {
   const [minBeds, setMinBeds] = useState("");
 
   const districts = useMemo(() => {
-    if (!state) return districtData.states.flatMap((s) => s.districts);
-    return districtData.states.find((s) => s.state === state)?.districts ?? [];
+    // District names repeat across states (Pratapgarh is in both Uttar Pradesh
+    // and Rajasthan), so the "any state" list has to be de-duplicated or React
+    // sees two options with the same key.
+    const list = state
+      ? districtData.states.find((s) => s.state === state)?.districts ?? []
+      : districtData.states.flatMap((s) => s.districts);
+    return [...new Set(list)].sort((a, b) => a.localeCompare(b));
   }, [state]);
 
   const fetchRooms = useCallback(async (pageNum) => {
