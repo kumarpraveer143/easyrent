@@ -1,306 +1,268 @@
-import React, { useState, useEffect } from "react";
-import {
-  FaUser,
-  FaHome,
-  FaUpload,
-  FaMoneyBillAlt,
-  FaSearch,
-  FaStar,
-  FaHouseUser,
-  FaArchive,
-  FaChartLine,
-  FaCog,
-  FaBell,
-  FaArrowRight,
-} from "react-icons/fa";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
+import {
+  Page,
+  PageHeader,
+  Section,
+  Card,
+  Badge,
+  Stat,
+  StatRow,
+  Skeleton,
+  LoadingAnnounce,
+  Alert,
+  money,
+} from "../components/UI";
 
-const Dashboard = () => {
+const API = import.meta.env.VITE_API_URL;
+
+/**
+ * The dashboard used to be a static grid of links plus three cards that said
+ * "Your account is active", "Stay updated with real-time notifications" and
+ * "Customize your preferences" — no data, no numbers, nothing that changes
+ * based on what's actually happening.
+ *
+ * It now answers the questions the two roles actually open the app to ask:
+ *   landlord — how many units do I have, how many are let, who's waiting?
+ *   renter   — where do I live, what do I pay, what have I applied for?
+ */
+
+const LANDLORD_LINKS = [
+  { to: "/landowner-rooms", label: "My rooms", desc: "Edit listings and availability" },
+  { to: "/uploadrooms", label: "Add a room", desc: "List a new unit" },
+  { to: "/my-renters", label: "Tenants", desc: "Current tenancies and rent" },
+  { to: "/incoming-request", label: "Applications", desc: "People who applied" },
+  { to: "/archieved-renters", label: "Past tenants", desc: "Archived tenancies" },
+  { to: "/payment-history", label: "Payments", desc: "Rent collected" },
+];
+
+const RENTER_LINKS = [
+  { to: "/findrooms", label: "Find a room", desc: "Browse available listings" },
+  { to: "/rentersMyRoom", label: "My room", desc: "Your current tenancy" },
+  { to: "/renter-history", label: "Rent paid", desc: "Your payment record" },
+  { to: "/favouriteRooms", label: "Saved", desc: "Rooms you've shortlisted" },
+];
+
+export default function Dashboard() {
   const [user, setUser] = useState(null);
-  const [isVisible, setIsVisible] = useState(false);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    // Get user data from localStorage or session storage
-    const userData = JSON.parse(localStorage.getItem('user')) || JSON.parse(sessionStorage.getItem('user'));
-    setUser(userData);
-    setIsVisible(true);
+    let cancelled = false;
+
+    try {
+      setUser(JSON.parse(localStorage.getItem("user")));
+    } catch {
+      setUser(null);
+    }
+
+    const load = async () => {
+      let parsed = null;
+      try {
+        parsed = JSON.parse(localStorage.getItem("user"));
+      } catch {
+        parsed = null;
+      }
+      if (!parsed) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        if (parsed.userType === "landowner") {
+          // Both requests go out together rather than in a waterfall.
+          const [roomsRes, rentersRes] = await Promise.all([
+            axios.get(`${API}/rooms/myRoom`, { withCredentials: true }),
+            axios.get(`${API}/relationship/getRenters`, { withCredentials: true }),
+          ]);
+
+          const rooms = roomsRes.data.message ?? [];
+          const renters = rentersRes.data.renters ?? [];
+          const active = renters.filter((r) => r.renterStatus === "active");
+
+          if (cancelled) return;
+          setStats({
+            role: "landowner",
+            rooms: rooms.length,
+            let: active.length,
+            vacant: rooms.filter((r) => r.isAvailable).length,
+            applications: rooms.reduce((n, r) => n + (r.requestCount ?? 0), 0),
+            monthlyRent: active.reduce((n, r) => n + (r.roomDetails?.rentPrice ?? 0), 0),
+            tenants: active,
+          });
+        } else {
+          const [engagedRes, favRes] = await Promise.all([
+            axios.get(`${API}/relationship/engaged`, { withCredentials: true }),
+            axios.get(`${API}/favourite/myfavourite`, { withCredentials: true }),
+          ]);
+
+          const engaged = engagedRes.data.message === true;
+          let room = null;
+          if (engaged) {
+            const roomRes = await axios.get(`${API}/relationship/getRoomDetails`, {
+              withCredentials: true,
+            });
+            room = roomRes.data.room ?? null;
+          }
+
+          if (cancelled) return;
+          setStats({
+            role: "renter",
+            engaged,
+            room,
+            saved: (favRes.data.rooms ?? []).filter(Boolean).length,
+          });
+        }
+      } catch {
+        if (!cancelled) setError("Couldn't load your dashboard. Refresh to try again.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    load();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const { userType, name } = user || {};
-
-  const dashboardCards = [
-    {
-      id: "profile",
-      title: "Profile",
-      description: "View and edit your profile details easily.",
-      icon: FaUser,
-      link: "/profile",
-      color: "from-blue-500 to-blue-600",
-      bgColor: "bg-blue-50",
-      iconColor: "text-blue-600",
-      hoverColor: "hover:border-blue-300 hover:shadow-blue-100",
-      delay: "0ms"
-    },
-    ...(userType === "landowner" ? [
-      {
-        id: "my-rooms",
-        title: "My Rooms",
-        description: "Manage the rooms you own and oversee their details.",
-        icon: FaHome,
-        link: "/landowner-rooms",
-        color: "from-green-500 to-green-600",
-        bgColor: "bg-green-50",
-        iconColor: "text-green-600",
-        hoverColor: "hover:border-green-300 hover:shadow-green-100",
-        delay: "100ms"
-      },
-      {
-        id: "upload-rooms",
-        title: "Upload Rooms",
-        description: "Add new rooms to your listings with ease.",
-        icon: FaUpload,
-        link: "/uploadrooms",
-        color: "from-purple-500 to-purple-600",
-        bgColor: "bg-purple-50",
-        iconColor: "text-purple-600",
-        hoverColor: "hover:border-purple-300 hover:shadow-purple-100",
-        delay: "200ms"
-      },
-      {
-        id: "my-renters",
-        title: "My Renters",
-        description: "Add and manage renters here with ease.",
-        icon: FaHouseUser,
-        link: "/my-renters",
-        color: "from-pink-500 to-pink-600",
-        bgColor: "bg-pink-50",
-        iconColor: "text-pink-600",
-        hoverColor: "hover:border-pink-300 hover:shadow-pink-100",
-        delay: "300ms"
-      },
-      {
-        id: "archived-renters",
-        title: "Archived Renters",
-        description: "View your archived renters here.",
-        icon: FaArchive,
-        link: "/archieved-renters",
-        color: "from-orange-500 to-orange-600",
-        bgColor: "bg-orange-50",
-        iconColor: "text-orange-600",
-        hoverColor: "hover:border-orange-300 hover:shadow-orange-100",
-        delay: "400ms"
-      }
-    ] : userType === "renter" ? [
-      {
-        id: "find-rooms",
-        title: "Find Rooms",
-        description: "Search and discover rooms that match your preferences.",
-        icon: FaSearch,
-        link: "/findRooms",
-        color: "from-purple-500 to-purple-600",
-        bgColor: "bg-purple-50",
-        iconColor: "text-purple-600",
-        hoverColor: "hover:border-purple-300 hover:shadow-purple-100",
-        delay: "100ms"
-      },
-      {
-        id: "favourite-rooms",
-        title: "Favourite Rooms",
-        description: "View your saved favorite rooms here.",
-        icon: FaStar,
-        link: "/favouriteRooms",
-        color: "from-yellow-500 to-yellow-600",
-        bgColor: "bg-yellow-50",
-        iconColor: "text-yellow-600",
-        hoverColor: "hover:border-yellow-300 hover:shadow-yellow-100",
-        delay: "200ms"
-      },
-      {
-        id: "my-room",
-        title: "My Room",
-        description: "Check details and payment history updated by the owner.",
-        icon: FaHouseUser,
-        link: "/rentersMyRoom",
-        color: "from-pink-500 to-pink-600",
-        bgColor: "bg-pink-50",
-        iconColor: "text-pink-600",
-        hoverColor: "hover:border-pink-300 hover:shadow-pink-100",
-        delay: "300ms"
-      }
-    ] : []),
-    {
-      id: "payment-history",
-      title: "Payment History",
-      description: "Track your payment records and transaction history.",
-      icon: FaMoneyBillAlt,
-      link: "/payment-history",
-      color: "from-emerald-500 to-emerald-600",
-      bgColor: "bg-emerald-50",
-      iconColor: "text-emerald-600",
-      hoverColor: "hover:border-emerald-300 hover:shadow-emerald-100",
-      delay: userType === "landowner" ? "500ms" : "400ms"
-    }
-  ];
+  const isLandlord = user?.userType === "landowner";
+  const links = isLandlord ? LANDLORD_LINKS : RENTER_LINKS;
 
   return (
-    <div className="font-sans bg-gray-50 text-gray-900 min-h-screen overflow-x-hidden">
-      {/* Hero Section */}
-      <section className="relative bg-white py-16 overflow-hidden border-b border-gray-100">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-50 opacity-50"></div>
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-0 w-96 h-96 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" style={{ animationDelay: '2s' }}></div>
-        </div>
+    <Page width="wide">
+      <PageHeader
+        title={user?.name ? `Hello, ${user.name}` : "Dashboard"}
+        description={
+          isLandlord
+            ? "Your properties, tenants and rent at a glance."
+            : "Your tenancy, payments and saved rooms."
+        }
+        actions={
+          <Badge tone="neutral">{isLandlord ? "Landlord" : "Renter"}</Badge>
+        }
+      />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-6xl mb-4">
-              Welcome Back{name ? `, ${name}` : ''}! 👋
-            </h1>
-            <p className="mt-4 max-w-2xl text-lg text-gray-600 sm:text-xl mx-auto leading-relaxed">
-              Manage your {userType === "landowner" ? "properties and renters" : "rental experience"} with our intuitive dashboard tools.
-            </p>
-          </div>
+      {error && (
+        <Alert tone="danger" className="mb-6">
+          {error}
+        </Alert>
+      )}
 
-          {/* User Info Badge */}
-          <div className="flex justify-center">
-            <div className="inline-flex items-center bg-white rounded-full px-6 py-3 shadow-md border border-gray-200">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center mr-3">
-                <FaUser className="text-white text-lg" />
-              </div>
-              <div className="text-left">
-                <p className="text-xs text-gray-500 font-medium">Logged in as</p>
-                <p className="text-sm font-bold text-gray-900 capitalize">{userType || "User"}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Quick Access Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl mb-3">
-              Quick Access
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Access all your important features and tools from one central location.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {dashboardCards.map((card, index) => (
-              <Link
-                key={card.id}
-                to={card.link}
-                className={`group bg-white rounded-2xl p-6 shadow-md border-2 border-gray-100 ${card.hoverColor} transition-all duration-300 transform hover:-translate-y-1`}
-                style={{
-                  animationDelay: card.delay,
-                  opacity: isVisible ? 1 : 0,
-                  transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
-                  transition: `all 0.6s ease-out ${card.delay}`
-                }}
-              >
-                <div className={`h-14 w-14 rounded-xl ${card.bgColor} flex items-center justify-center group-hover:scale-110 transition-transform duration-300 mb-4`}>
-                  <card.icon className={`h-7 w-7 ${card.iconColor}`} />
+      <Section>
+        {loading ? (
+          <>
+            <LoadingAnnounce>Loading your dashboard</LoadingAnnounce>
+            <div className="grid grid-cols-2 gap-px overflow-hidden rounded border border-line bg-line sm:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="bg-surface px-4 py-3.5">
+                  <Skeleton className="h-3 w-20" />
+                  <Skeleton className="mt-2 h-7 w-14" />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">
-                  {card.title}
-                </h3>
-                <p className="text-gray-600 text-sm leading-relaxed mb-4">
-                  {card.description}
-                </p>
+              ))}
+            </div>
+          </>
+        ) : stats?.role === "landowner" ? (
+          <StatRow>
+            <Stat label="Rooms listed" value={stats.rooms} />
+            <Stat label="Let" value={stats.let} tone={stats.let > 0 ? "ok" : "default"} />
+            <Stat label="Vacant" value={stats.vacant} />
+            <Stat
+              label="Rent per month"
+              value={money(stats.monthlyRent)}
+              hint={stats.let === 0 ? "No active tenancies" : `${stats.let} tenancy${stats.let === 1 ? "" : "ies"}`}
+            />
+          </StatRow>
+        ) : stats?.role === "renter" ? (
+          <StatRow className="sm:grid-cols-3">
+            <Stat
+              label="Current room"
+              value={stats.engaged && stats.room ? `#${stats.room.roomDetails?.roomNumber ?? "—"}` : "None"}
+              hint={stats.engaged ? stats.room?.houseName ?? "" : "You're not renting yet"}
+            />
+            <Stat
+              label="Rent per month"
+              value={stats.engaged ? money(stats.room?.roomDetails?.rentPrice) : "—"}
+            />
+            <Stat label="Saved rooms" value={stats.saved} />
+          </StatRow>
+        ) : null}
+      </Section>
 
-                {/* Hover Arrow */}
-                <div className="flex items-center text-primary-600 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                  <span className="text-sm font-bold">Access Now</span>
-                  <FaArrowRight className="ml-2 w-3 h-3 transform group-hover:translate-x-1 transition-transform duration-300" />
-                </div>
+      {/* The landlord's most actionable number gets its own callout, because
+          an application sitting unanswered is the thing that costs them money. */}
+      {!loading && stats?.role === "landowner" && stats.applications > 0 && (
+        <Section>
+          <Alert tone="warn">
+            <span className="font-medium">
+              {stats.applications} {stats.applications === 1 ? "person has" : "people have"} applied
+            </span>{" "}
+            to your rooms.{" "}
+            <Link to="/incoming-request" className="font-medium text-warn underline underline-offset-2">
+              Review applications
+            </Link>
+          </Alert>
+        </Section>
+      )}
+
+      {!loading && stats?.role === "landowner" && stats.rooms === 0 && (
+        <Section>
+          <Alert tone="info">
+            You haven&rsquo;t listed a room yet.{" "}
+            <Link to="/uploadrooms" className="font-medium text-accent underline underline-offset-2">
+              Add your first one
+            </Link>{" "}
+            so renters can find it.
+          </Alert>
+        </Section>
+      )}
+
+      <Section title="Manage">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {links.map((l) => (
+            <Card key={l.to} interactive className="p-0">
+              <Link to={l.to} className="block rounded px-4 py-3.5">
+                <span className="block text-body font-medium text-ink">{l.label}</span>
+                <span className="mt-0.5 block text-label text-ink-faint">{l.desc}</span>
               </Link>
-            ))}
-          </div>
+            </Card>
+          ))}
         </div>
-      </section>
+      </Section>
 
-      {/* Platform Overview Section */}
-      <section className="py-16 bg-white border-t border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl mb-3">
-              Platform Overview
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Get insights into your {userType === "landowner" ? "property management" : "rental"} activities.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="group bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-8 shadow-md border border-blue-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-              <div className="h-14 w-14 rounded-xl bg-white flex items-center justify-center group-hover:scale-110 transition-transform duration-300 mx-auto mb-6 shadow-md">
-                <FaChartLine className="h-7 w-7 text-blue-600" />
+      {!loading && stats?.role === "landowner" && stats.tenants?.length > 0 && (
+        <Section title="Current tenants" description="Who is in which room right now.">
+          <Card>
+            <ul className="divide-y divide-line">
+              {stats.tenants.slice(0, 5).map((t) => (
+                <li key={t.relationId} className="flex items-center justify-between gap-4 px-4 py-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-body font-medium text-ink">
+                      {t.renterDetails?.name ?? "Unknown"}
+                    </p>
+                    <p className="text-label text-ink-faint">
+                      Room {t.roomDetails?.roomNumber ?? "—"}
+                    </p>
+                  </div>
+                  <span className="tabular shrink-0 text-body text-ink">
+                    {money(t.roomDetails?.rentPrice)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            {stats.tenants.length > 5 && (
+              <div className="border-t border-line px-4 py-2.5">
+                <Link to="/my-renters" className="text-label font-medium text-accent hover:text-accent-hover">
+                  View all {stats.tenants.length} tenants
+                </Link>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 text-center mb-3">Active Status</h3>
-              <p className="text-gray-700 text-center leading-relaxed">
-                Your account is active and ready for {userType === "landowner" ? "property management" : "room searching"}.
-              </p>
-            </div>
-
-            <div className="group bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-8 shadow-md border border-purple-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-              <div className="h-14 w-14 rounded-xl bg-white flex items-center justify-center group-hover:scale-110 transition-transform duration-300 mx-auto mb-6 shadow-md">
-                <FaBell className="h-7 w-7 text-purple-600" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 text-center mb-3">Notifications</h3>
-              <p className="text-gray-700 text-center leading-relaxed">
-                Stay updated with real-time notifications about your activities.
-              </p>
-            </div>
-
-            <div className="group bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl p-8 shadow-md border border-emerald-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-              <div className="h-14 w-14 rounded-xl bg-white flex items-center justify-center group-hover:scale-110 transition-transform duration-300 mx-auto mb-6 shadow-md">
-                <FaCog className="h-7 w-7 text-emerald-600" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 text-center mb-3">Settings</h3>
-              <p className="text-gray-700 text-center leading-relaxed">
-                Customize your preferences and manage your account settings.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Help Section for First-Time Users */}
-      <section className="py-12 bg-gradient-to-br from-primary-50 to-indigo-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="bg-white rounded-2xl p-8 shadow-lg border border-primary-100">
-            <h3 className="text-2xl font-bold text-gray-900 mb-3">
-              New to EasyRent? 🎉
-            </h3>
-            <p className="text-gray-600 mb-6 leading-relaxed">
-              {userType === "landowner"
-                ? "Start by uploading your first property listing to connect with potential renters. Use the 'Upload Rooms' card above to get started!"
-                : "Begin your search by exploring available rooms in your preferred location. Click on 'Find Rooms' above to discover your perfect rental!"}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                to={userType === "landowner" ? "/uploadrooms" : "/findRooms"}
-                className="inline-flex items-center justify-center px-6 py-3 bg-gray-900 text-white font-bold rounded-xl hover:bg-gray-800 transition-all duration-300 transform hover:scale-105 shadow-md"
-              >
-                {userType === "landowner" ? "Upload Your First Room" : "Find Your Perfect Room"}
-                <FaArrowRight className="ml-2" />
-              </Link>
-              <Link
-                to="/profile"
-                className="inline-flex items-center justify-center px-6 py-3 bg-white text-gray-900 font-bold rounded-xl border-2 border-gray-200 hover:border-gray-300 transition-all duration-300"
-              >
-                Complete Your Profile
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
+            )}
+          </Card>
+        </Section>
+      )}
+    </Page>
   );
-};
-
-export default Dashboard;
+}

@@ -62,17 +62,15 @@ const PaymentHistory = React.lazy(() =>
 const MyRenters = React.lazy(() => import("./pages/landownerPages/MyRenters"));
 
 import AxiosInterceptor from "./components/AxiosInterceptor";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 const App = () => {
   return (
     <BrowserRouter>
+      <ErrorBoundary>
       <AxiosInterceptor />
       <Suspense
-        fallback={
-          <div className="font-sans bg-gray-900 text-white min-h-screen flex items-center justify-center">
-            <Loading />
-          </div>
-        }
+        fallback={<Loading />}
       >
         <Routes>
           {/* Open Routes for all */}
@@ -139,6 +137,7 @@ const App = () => {
           </Route>
         </Routes>
       </Suspense>
+      </ErrorBoundary>
       <ToastContainer
         position="top-center"
         autoClose={3000}
