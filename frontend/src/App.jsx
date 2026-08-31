@@ -28,12 +28,10 @@ const Layout = React.lazy(() => import("./components/layouts/Layout"));
 const ArchievedRenters = React.lazy(() =>
   import("./pages/landownerPages/ArchievedRenters")
 );
-const NoRenters = React.lazy(() => import("./pages/landownerPages/NoRenters"));
 const AddRent = React.lazy(() => import("./pages/landownerPages/AddRent"));
 const CheckHistory = React.lazy(() =>
   import("./pages/landownerPages/CheckHistory")
 );
-const NoHistory = React.lazy(() => import("./pages/landownerPages/NoHistory"));
 
 const ProtectedRoute = React.lazy(() =>
   import("./components/Auth/ProtectedRoute")
@@ -115,14 +113,12 @@ const App = () => {
                 <Route path="/landowner-rooms" element={<LandOwnerRooms />} />
                 <Route path="/my-renters" element={<MyRenters />} />
                 <Route path="/add-rent/:relationId" element={<AddRent />} />
-                <Route path="/no-history" element={<NoHistory />} />
                 <Route
                   path="/check-history/:relationId"
                   element={<CheckHistory />}
                 />
                 <Route path="/incoming-request" element={<IncommingRequest />} />
                 <Route path="/archieved-renters" element={<ArchievedRenters />} />
-                <Route path="/no-renters" element={<NoRenters />} />
               </Route>
 
               {/* Protected Routes for all users  */}
