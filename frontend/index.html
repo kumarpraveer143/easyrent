@@ -3,7 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="EasyRent connects landlords and renters: list a room, apply for one, and keep rent and receipts in one place." />
+    <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)" />
     <title>EasyRent</title>
+    <script>
+      // Set the theme attributes before the first paint, so a stored dark theme
+      // never flashes light. The variables themselves are injected by main.jsx.
+      (function () {
+        try {
+          var t = localStorage.getItem('easyrent:theme') || 'slate';
+          var m = localStorage.getItem('easyrent:mode') || 'system';
+          var dark = m === 'dark' || (m === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          var root = document.documentElement;
+          root.dataset.theme = t;
+          root.dataset.mode = dark ? 'dark' : 'light';
+          root.style.colorScheme = dark ? 'dark' : 'light';
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

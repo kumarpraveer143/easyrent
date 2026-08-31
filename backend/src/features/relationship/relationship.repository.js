@@ -1,11 +1,10 @@
-import mongoose from "mongoose";
-import relationshipSchema from "./relationship.schema.js";
 import RoomRepository from "../rooms/room.repository.js";
 import RequestRepository from "../request/request.respository.js";
-import HistorySchema from "../history/history.schema.js";
-
-const relationshipModel = mongoose.model("relationship", relationshipSchema);
-const historyModel = mongoose.model("history", HistorySchema);
+import {
+  Relationship as relationshipModel,
+  History as historyModel,
+  Room as RoomModel,
+} from "../../models/index.js";
 
 const roomRepository = new RoomRepository();
 const requestRepository = new RequestRepository();
@@ -31,7 +30,15 @@ class RelationshipSchma {
     const extractedDetails = findRelations.map((item) => ({
       renterStatus: item.status,
       relationId: item._id,
-      renterDetails: item.renterId,
+      // Narrowed from the raw User document — see SEC-09.
+      renterDetails: item.renterId
+        ? {
+            _id: item.renterId._id,
+            name: item.renterId.name,
+            email: item.renterId.email,
+            phoneNumber: item.renterId.phoneNumber,
+          }
+        : null,
       roomDetails: {
         roomNumber: item.roomId.roomNumber,
         roomId: item.roomId._id,
@@ -53,8 +60,15 @@ class RelationshipSchma {
   //remove the renters from the landowner house
   async changeStatus(relationId) {
     const relation = await relationshipModel.findOne({ _id: relationId });
+    if (!relation) return null;
+
     relation.status = "archive";
     await relation.save();
+
+    // BUG-02: acceptRequest sets isAvailable = false and nothing ever set it
+    // back, so every room that was ever let vanished from search permanently.
+    await RoomModel.findByIdAndUpdate(relation.roomId, { isAvailable: true });
+
     return relation;
   }
 
@@ -78,6 +92,12 @@ class RelationshipSchma {
       })
       .populate("roomId")
       .populate("ownerId");
+
+    // BUG-07: this used to read room._id straight away, so a renter with no
+    // active tenancy — the state EVERY renter starts in — got a 500 on the
+    // "My room" page instead of an empty state.
+    if (!room) return null;
+
     let extractedData = {
       relationId: room._id,
       renterId: room.renterId,
@@ -97,7 +117,8 @@ class RelationshipSchma {
       renterId: userId,
       status: "active",
     });
-    let relationId = relation._id;
+    if (!relation) return [];
+    const relationId = relation._id;
     const history = await historyModel.find({ relationId }).sort({ date: -1 });
     return history;
   }
@@ -123,6 +144,7 @@ class RelationshipSchma {
       ownerId: userId,
       _id: relationId,
     });
+    if (!isArchieve) return false;
     if (isArchieve.status == "active") {
       return true;
     } else {

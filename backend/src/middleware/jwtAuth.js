@@ -1,18 +1,8 @@
-import jwt from "jsonwebtoken";
-import UserRepository from "../features/users/user.repository.js";
+import { requireAuth } from "./authorize.js";
 
-const userRepository = new UserRepository();
-
-const jwtAuth = async (req, res, next) => {
-  const { token } = req.cookies;
-
-  try {
-    let payload = jwt.verify(token, process.env.SECRET_KEY);
-    req.userId = payload.id;
-  } catch (err) {
-    return res.status(401).send("Unauthorized!");
-  }
-  next();
-};
-
-export default jwtAuth;
+/**
+ * Kept as a named file so existing route imports keep working, but it now
+ * delegates to requireAuth — which loads the user and sets `req.user`, so
+ * controllers never have to trust `req.cookies.userId` again.
+ */
+export default requireAuth;

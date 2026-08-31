@@ -1,23 +1,13 @@
-import jwt from "jsonwebtoken";
-import UserRepository from "../features/users/user.repository.js";
+import { requireAuth, requireRole } from "./authorize.js";
 
-const userRepository = new UserRepository();
+/**
+ * "Is this person a landowner?" — and nothing more.
+ *
+ * This is deliberately still only a ROLE check. It never implied ownership of
+ * the thing being acted on, and the mistake was routes treating it as if it
+ * did. Routes that touch a specific room or tenancy must now ALSO mount
+ * `authorize("room" | "relationship", …)`.
+ */
+const landOwnerAuth = [requireAuth, requireRole("landowner")];
 
-const landOwnerAuth = async (req, res, next) => {
-  const { token } = req.cookies;
-  let payload;
-  let user;
-  try {
-    payload = jwt.verify(token, process.env.SECRET_KEY);
-    let { id } = payload;
-    user = await userRepository.getUserById(id);
-    req.userId = user._id.toString();
-  } catch (err) {
-    return res.status(401).send("Authentication failed!");
-  }
-  if (user.userType !== "landowner") {
-    return res.status(401).send("Only landowner can access this route");
-  }
-  next();
-};
 export default landOwnerAuth;

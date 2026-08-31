@@ -1,28 +1,83 @@
+/* Inter, self-hosted.
+   The design system has always NAMED Inter in its font stack, but nothing ever
+   loaded it — so every screen silently fell back to Segoe UI on Windows and
+   Roboto on Android, which is why type read thinner and less even than
+   intended. Self-hosted rather than Google Fonts: no third-party request, no
+   flash of unstyled text from a CDN, nothing to fail offline. */
+@import "@fontsource-variable/inter";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  body {
-    @apply bg-gray-50 text-gray-900 font-sans antialiased;
+  html {
+    /* Inter's own metrics are optimised at these settings; without them the
+       lowercase reads slightly loose at 15px. */
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    text-rendering: optimizeLegibility;
   }
+
+  body {
+    @apply bg-surface-sunken text-ink-muted font-sans text-body antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply text-ink font-semibold;
+    text-wrap: balance;
+  }
+
+  /* Every focusable thing gets the same visible ring. This is the single
+     biggest accessibility win in the app and it belongs in base, not
+     sprinkled per-component. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-accent ring-offset-2 ring-offset-surface rounded;
+  }
+
+  /* Numbers that sit in columns — rent, totals, dates — line up. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  /* The skip link: visible only when focused. Lets a keyboard user jump
+     past the nav on every page. */
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50
+           focus:rounded focus:border focus:border-line-strong focus:bg-surface
+           focus:px-3 focus:py-2 focus:text-label focus:text-ink;
+  }
+}
+
+/*
+ * Kill every colour transition while the theme is switching.
+ *
+ * Components use `transition-colors` for hover, which is right — but on a theme
+ * swap EVERY element animates its background and text independently, so for
+ * ~150ms you see dark surfaces with dark text on them. ThemeProvider sets this
+ * attribute for one frame around the change.
+ */
+[data-theme-switching] *,
+[data-theme-switching] *::before,
+[data-theme-switching] *::after {
+  transition: none !important;
 }
 
 .developer {
   clip-path: polygon(50% 0%, 100% 38%, 100% 100%, 0 100%, 0% 38%);
 }
 
-@keyframes slide-up {
-  from {
-    transform: translateY(100%);
-    opacity: 0;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.animate-slide-up {
-  animation: slide-up 0.3s ease-out forwards;
 }

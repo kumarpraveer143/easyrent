@@ -32,4 +32,14 @@ const relationshipSchema = new mongoose.Schema(
   }
 );
 
+relationshipSchema.index({ ownerId: 1, status: 1 });
+relationshipSchema.index({ renterId: 1, status: 1 });
+
+// A room can have at most ONE active tenancy. Nothing enforced this, so two
+// concurrent accepts both succeeded and the room was let twice.
+relationshipSchema.index(
+  { roomId: 1 },
+  { unique: true, partialFilterExpression: { status: "active" } }
+);
+
 export default relationshipSchema;

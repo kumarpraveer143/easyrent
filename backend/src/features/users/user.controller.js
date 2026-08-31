@@ -5,6 +5,34 @@ import sendWelcomeEmail from "../../util/email/welcomeMail.js";
 import sendPasswordResetEmail from "../../util/email/resetPassword.js";
 import crypto from "crypto";
 
+/**
+ * The ONLY shape a user is allowed to leave the API in.
+ *
+ * Handlers used to return raw mongoose documents, which carry the password
+ * hash (when selected), and — for applicant/tenant listings — date of birth,
+ * home address and, until it was dropped, the Aadhaar number.
+ */
+export function publicUser(doc) {
+  if (!doc) return null;
+  const u = doc.toObject ? doc.toObject() : doc;
+  return {
+    _id: u._id,
+    name: u.name,
+    email: u.email,
+    userType: u.userType,
+    phoneNumber: u.phoneNumber,
+    houseName: u.houseName,
+    createdAt: u.createdAt,
+  };
+}
+
+/** Even narrower: what a landlord may see about an applicant. */
+export function applicantUser(doc) {
+  if (!doc) return null;
+  const u = doc.toObject ? doc.toObject() : doc;
+  return { _id: u._id, name: u.name, email: u.email, phoneNumber: u.phoneNumber };
+}
+
 export default class UserController {
   constructor() {
     this.userRepository = new UserRepository();
@@ -14,7 +42,7 @@ export default class UserController {
   async getAllUsers(req, res) {
     try {
       const users = await this.userRepository.getAllUsers();
-      return res.status(200).json({ success: true, users: users });
+      return res.status(200).json({ success: true, users: users.map(publicUser) });
     } catch (err) {
       console.log(err);
       return res.status(500).json({
@@ -27,8 +55,32 @@ export default class UserController {
   //user register controller
   async registerUser(req, res) {
     try {
-      const user = req.body;
       const { email } = req.body;
+
+      // SEC-03: req.body used to be handed straight to the model, and
+      // `userType` is a normal schema field whose enum includes "admin" — so a
+      // signup request carrying "userType": "admin" created an admin account.
+      // Only these fields are ever accepted, and the role is clamped.
+      const {
+        name,
+        password,
+        phoneNumber,
+        dateOfBirth,
+        homeAddress,
+        houseName,
+        userType,
+      } = req.body;
+
+      const user = {
+        name,
+        email,
+        password,
+        phoneNumber,
+        dateOfBirth,
+        homeAddress,
+        ...(houseName !== undefined && { houseName }),
+        userType: userType === "landowner" ? "landowner" : "renter",
+      };
       // Check if email already exists in the database
       const findUserByEmail = await this.userRepository.findUserByEmail({
         email,
@@ -41,12 +93,10 @@ export default class UserController {
         });
       }
 
-      const registeredUser = await this.userRepository.registerUser(req.body);
+      const registeredUser = await this.userRepository.registerUser(user);
       sendWelcomeEmail(user);
 
-      return res
-        .status(200)
-        .json({ success: true, registeredUser: registeredUser });
+      return res.status(201).json({ success: true, user: publicUser(registeredUser) });
     } catch (err) {
       console.error(err);
       if (err.name === "ValidationError") {
@@ -105,7 +155,10 @@ export default class UserController {
           sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
         })
         .status(200)
-        .json({ success: true, user: user });
+        // SEC-08: this used to return `user` — the document fetched with
+        // .select("+password") — so every login handed the browser the bcrypt
+        // hash, which the frontend then wrote to localStorage.
+        .json({ success: true, user: publicUser(user) });
     } catch (err) {
       console.log(err);
       return res.status(500).json({
@@ -141,12 +194,11 @@ export default class UserController {
   //user edit controller
   async editProfile(req, res) {
     try {
-      const token = req.cookies.token;
-      const payload = jwt.verify(token, process.env.SECRET_KEY);
-      const id = payload.id;
+      // requireAuth already verified the token and loaded the user.
+      const id = req.userId;
 
       // Explicitly filter allowed fields to avoid updating sensitive/immutable data
-      const allowedFields = ['name', 'phoneNumber', 'dateOfBirth', 'homeAddress', 'houseName', 'aadharCardNumber'];
+      const allowedFields = ['name', 'phoneNumber', 'dateOfBirth', 'homeAddress', 'houseName'];
       const updateData = {};
 
       Object.keys(req.body).forEach(key => {
@@ -155,12 +207,7 @@ export default class UserController {
         }
       });
 
-      console.log("Updating user:", id);
-      console.log("Filtered update data:", JSON.stringify(updateData, null, 2));
-
       const updatedUser = await this.userRepository.updateUserById(id, updateData);
-
-      console.log("Updated user result:", updatedUser);
 
       if (!updatedUser) {
         return res.status(404).json({ success: false, message: "User not found" });
@@ -168,7 +215,7 @@ export default class UserController {
 
       return res
         .status(200)
-        .json({ success: true, message: "updated successfully!", user: updatedUser });
+        .json({ success: true, message: "Profile updated.", user: publicUser(updatedUser) });
     } catch (err) {
       console.error("Error updating profile:", err);
       return res.status(500).json({
@@ -245,29 +292,12 @@ export default class UserController {
     });
   }
 
-  //update the user password
-  async updatePassword(req, res) {
-    const { currentPassword, newPassword, confirmPassword } = req.body;
-    try {
-      if (!currentPassword) {
-        return res
-          .status(401)
-          .json({ success: false, message: "Please enter current password" });
-      }
-      const user = await this.userRepository({ _id: req.users._id }, true);
-    } catch (err) {
-      console.log(err);
-      return res.status(401).json({
-        success: false,
-        message: "Something went wrong with database",
-      });
-    }
-  }
-
   //delete user controller
   async deleteUser(req, res) {
     try {
-      const deletedUser = await this.userRepository.deleteUser(req.body.id);
+      // BUG-12: this read req.body.id while the route supplies :id, so it
+      // always deleted nothing and still reported success.
+      const deletedUser = await this.userRepository.deleteUser(req.params.id);
       if (!deletedUser) {
         return res
           .status(400)
@@ -288,7 +318,7 @@ export default class UserController {
   async getAllRenters(req, res) {
     try {
       const renters = await this.userRepository.getAllRenters();
-      return res.status(200).json({ success: true, message: renters });
+      return res.status(200).json({ success: true, message: renters.map(publicUser) });
     } catch (err) {
       return res.status(500).json({
         success: false,
@@ -301,7 +331,7 @@ export default class UserController {
   async getAllLandlords(req, res) {
     try {
       const landlords = await this.userRepository.getAllLandlords();
-      return res.status(200).json({ success: true, message: landlords });
+      return res.status(200).json({ success: true, message: landlords.map(publicUser) });
     } catch (err) {
       return res.status(500).json({
         success: false,

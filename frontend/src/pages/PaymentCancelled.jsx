@@ -1,32 +1,25 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FaTimesCircle, FaArrowLeft } from 'react-icons/fa';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { Page, Button, Alert } from "../components/UI";
 
-const PaymentCancelled = () => {
-    const navigate = useNavigate();
+export default function PaymentCancelled() {
+  const navigate = useNavigate();
 
-    return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-            <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
-                <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <FaTimesCircle className="h-12 w-12 text-red-600" />
-                </div>
+  return (
+    <Page width="narrow">
+      <div className="py-12">
+        <h1 className="text-display text-ink">Payment cancelled</h1>
+        <Alert tone="info" className="mt-4">
+          Nothing was charged. Your rent is still outstanding — you can pay online again,
+          or pay your landlord directly and ask them to record it.
+        </Alert>
 
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">Payment Cancelled</h1>
-                <p className="text-gray-600 mb-8">
-                    Your payment was cancelled. No charges were made to your account.
-                </p>
-
-                <button
-                    onClick={() => navigate('/rentersMyRoom')}
-                    className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 flex items-center justify-center space-x-2"
-                >
-                    <FaArrowLeft className="h-5 w-5" />
-                    <span>Back to My Room</span>
-                </button>
-            </div>
+        <div className="mt-6 flex flex-wrap gap-2">
+          <Button variant="primary" onClick={() => navigate("/rentersMyRoom")}>
+            Back to my room
+          </Button>
         </div>
-    );
-};
-
-export default PaymentCancelled;
+      </div>
+    </Page>
+  );
+}

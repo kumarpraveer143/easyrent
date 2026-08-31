@@ -78,4 +78,10 @@ RoomSchema.pre("save", function (next) {
   next();
 });
 
+// Search is "available rooms in this city/state" — without these it was a
+// full collection scan on every query.
+RoomSchema.index({ isAvailable: 1, "address.state": 1, "address.city": 1 });
+RoomSchema.index({ owner: 1 });
+RoomSchema.index({ rentPrice: 1 });
+
 export default RoomSchema;

@@ -1,7 +1,4 @@
-import mongoose from "mongoose";
-import HistorySchema from "./history.schema.js";
-
-const HistoryModel = mongoose.model("History", HistorySchema);
+import { History as HistoryModel } from "../../models/index.js";
 
 class HistoryRepository {
   async createHistory(historyObj) {
@@ -18,8 +15,7 @@ class HistoryRepository {
   }
 
   async getRenterHistory(relationId) {
-    const history = HistoryModel.find({ relationId }).sort({ date: -1 });
-    return history;
+    return await HistoryModel.find({ relationId }).sort({ date: -1 });
   }
 
   async updateHisotry(historyId, updatedHistory) {

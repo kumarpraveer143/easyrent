@@ -1,7 +1,4 @@
-import mongoose from "mongoose";
-import requestSchema from "./request.schema.js";
-
-const requestModel = mongoose.model("Request", requestSchema);
+import { Request as requestModel, Room as RoomModel } from "../../models/index.js";
 
 class RequestRepository {
   async toggleRequest(renterId, roomId) {
@@ -52,7 +49,6 @@ class RequestRepository {
 
   async getRoomDetails(roomId) {
     try {
-      const RoomModel = mongoose.model("Room");
       const room = await RoomModel.findById(roomId);
       return room;
     } catch (error) {

@@ -1,147 +1,76 @@
-import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React from "react";
 import axios from "axios";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
-import { FaLock, FaCheckCircle, FaKey } from "react-icons/fa";
+import { Button, Input, Alert } from "../components/UI";
+import { resetPasswordSchema } from "../lib/validation";
+import useForm from "../lib/useForm";
 
-const Reset = () => {
+export default function Reset() {
   const { token } = useParams();
   const navigate = useNavigate();
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match!");
-      return;
-    }
-    try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/users/password/reset/${token}`,
-        {
-          password,
-          confirmPassword,
-        }
-      );
-      toast.success("Password reset successfully!");
-      setTimeout(() => {
+  const { field, handleSubmit, submitting, formError } = useForm({
+    schema: resetPasswordSchema,
+    initialValues: { password: "", confirmPassword: "" },
+    onSubmit: async (data, { setServerErrors }) => {
+      try {
+        await axios.post(
+          `${import.meta.env.VITE_API_URL}/users/password/reset/${token}`,
+          data
+        );
+        toast.success("Password changed. Sign in with your new one.");
         navigate("/login");
-      }, 2000);
-    } catch (err) {
-      toast.error(
-        err.response?.data?.message ||
-        "Failed to reset password. Please try again."
-      );
-    }
-  };
+      } catch (err) {
+        const body = err.response?.data;
+        setServerErrors({
+          ...(body?.errors ?? {}),
+          ...(body?.errors
+            ? {}
+            : {
+                _:
+                  body?.message ??
+                  "That reset link is invalid or has expired. Request a new one.",
+              }),
+        });
+      }
+    },
+  });
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 relative overflow-hidden font-sans py-12 px-4">
-      {/* Background decorations */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" style={{ animationDelay: '2s' }}></div>
-      </div>
+    <main id="main" className="mx-auto w-full max-w-md px-4 py-16">
+      <h1 className="text-display text-ink">Set a new password</h1>
+      <p className="mt-1 text-body text-ink-faint">
+        At least 8 characters, with a letter and a number.
+      </p>
 
-      <div className="relative w-full max-w-md">
-        {/* Card */}
-        <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl border border-gray-100 p-8 sm:p-10">
-          {/* Icon */}
-          <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center shadow-lg">
-              <FaKey className="h-8 w-8 text-white" />
-            </div>
-          </div>
+      <form onSubmit={handleSubmit} noValidate className="mt-6 flex flex-col gap-4">
+        {formError && <Alert tone="danger">{formError}</Alert>}
 
-          {/* Heading */}
-          <h2 className="mb-3 text-3xl font-extrabold text-center text-gray-900">
-            Reset Your Password
-          </h2>
-          <p className="mb-8 text-center text-gray-600">
-            Enter your new password below to reset your account password.
-          </p>
+        <Input
+          label="New password"
+          type="password"
+          autoComplete="new-password"
+          {...field("password")}
+        />
+        <Input
+          label="Confirm new password"
+          type="password"
+          autoComplete="new-password"
+          {...field("confirmPassword")}
+        />
 
-          {/* Form */}
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-bold text-gray-700 mb-2"
-              >
-                New Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaLock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent placeholder-gray-400 transition-all duration-300 hover:bg-white"
-                  placeholder="Enter new password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
+        <Button type="submit" variant="primary" loading={submitting}>
+          {submitting ? "Saving…" : "Change password"}
+        </Button>
+      </form>
 
-            <div>
-              <label
-                htmlFor="confirmPassword"
-                className="block text-sm font-bold text-gray-700 mb-2"
-              >
-                Confirm New Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaCheckCircle className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="password"
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder-gray-400 transition-all duration-300 hover:bg-white"
-                  placeholder="Confirm new password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              className="w-full flex items-center justify-center px-4 py-3 text-lg font-bold text-white bg-gray-900 rounded-xl shadow-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 transition-all duration-300 group"
-            >
-              <FaCheckCircle className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform duration-300" />
-              Reset Password
-            </button>
-          </form>
-
-          {/* Info */}
-          <div className="mt-6 p-4 bg-blue-50 border border-blue-100 rounded-xl">
-            <p className="text-sm text-gray-700 text-center">
-              <span className="font-semibold">Tip:</span> Use a strong password with at least 8 characters, including uppercase, lowercase, numbers, and symbols.
-            </p>
-          </div>
-        </div>
-
-        {/* Bottom text */}
-        <p className="mt-6 text-center text-sm text-gray-600">
-          Remember your password?{" "}
-          <button
-            onClick={() => navigate("/login")}
-            className="font-bold text-primary-600 hover:text-primary-700 transition-colors"
-          >
-            Sign in
-          </button>
-        </p>
-      </div>
-    </div>
+      <p className="mt-6 border-t border-line pt-5 text-body text-ink-faint">
+        Link expired?{" "}
+        <Link to="/forget-password" className="font-medium text-accent hover:text-accent-hover">
+          Request a new one
+        </Link>
+      </p>
+    </main>
   );
-};
-
-export default Reset;
+}

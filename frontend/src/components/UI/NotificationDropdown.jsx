@@ -1,186 +1,138 @@
-import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
-import { FaCheck, FaCheckDouble, FaTimes } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
-import { onNotification, offNotification } from '../../services/socket.service';
+import React, { useState, useEffect, useCallback } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { onNotification, offNotification } from "../../services/socket.service";
+import { dateTime } from "../../lib/format";
+import Button from "./Button";
+import { SkeletonRows } from "./Skeleton";
 
-const NotificationDropdown = ({ onClose, onMarkAsRead }) => {
-    const [notifications, setNotifications] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const dropdownRef = useRef(null);
-    const navigate = useNavigate();
+const API = import.meta.env.VITE_API_URL;
 
-    useEffect(() => {
-        fetchNotifications();
+/**
+ * Outside-click and Escape are handled by the Navbar, which owns whether this
+ * is open — having both manage it meant two listeners racing to close it.
+ */
+export default function NotificationDropdown({ onClose, onMarkAsRead }) {
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-        const handleNewNotification = () => {
-            fetchNotifications();
-        };
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const res = await axios.get(`${API}/notifications`, { withCredentials: true });
+      if (res.data.success) setNotifications(res.data.notifications ?? []);
+    } catch {
+      setError("Couldn't load notifications.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-        onNotification(handleNewNotification);
+  useEffect(() => {
+    fetchNotifications();
+    const onNew = () => fetchNotifications();
+    onNotification(onNew);
+    return () => offNotification(onNew);
+  }, [fetchNotifications]);
 
-        const handleClickOutside = (event) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                onClose();
-            }
-        };
+  const markOne = async (id) => {
+    // Optimistic: the badge should drop the instant you read it.
+    setNotifications((prev) => prev.map((n) => (n._id === id ? { ...n, isRead: true } : n)));
+    try {
+      await axios.patch(`${API}/notifications/${id}/read`, {}, { withCredentials: true });
+      await onMarkAsRead?.();
+    } catch {
+      setNotifications((prev) => prev.map((n) => (n._id === id ? { ...n, isRead: false } : n)));
+    }
+  };
 
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-            offNotification(handleNewNotification);
-        };
-    }, []);
+  const markAll = async () => {
+    const before = notifications;
+    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+    try {
+      await axios.patch(`${API}/notifications/read-all`, {}, { withCredentials: true });
+      await onMarkAsRead?.();
+    } catch {
+      setNotifications(before);
+    }
+  };
 
-    const fetchNotifications = async () => {
-        try {
-            const response = await axios.get(`${import.meta.env.VITE_API_URL}/notifications`, {
-                withCredentials: true,
-            });
-            if (response.data.success) {
-                setNotifications(response.data.notifications);
-            }
-        } catch (error) {
-            console.error('Error fetching notifications:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+  const open = (n) => {
+    if (!n.isRead) markOne(n._id);
+    onClose?.();
+    // Land the user where the notification is actually about.
+    if (n.type === "request_received") navigate("/incoming-request");
+    else if (n.type === "rent_paid") navigate("/my-renters");
+    else navigate("/dashboard");
+  };
 
-    const handleMarkAsRead = async (id) => {
-        try {
-            await axios.patch(`${import.meta.env.VITE_API_URL}/notifications/${id}/read`, {}, {
-                withCredentials: true,
-            });
-            setNotifications(prev =>
-                prev.map(n => n._id === id ? { ...n, isRead: true } : n)
-            );
-            await onMarkAsRead();
-        } catch (error) {
-            console.error('Error marking notification as read:', error);
-        }
-    };
+  const unread = notifications.filter((n) => !n.isRead).length;
 
-    const handleMarkAllAsRead = async () => {
-        try {
-            await axios.patch(`${import.meta.env.VITE_API_URL}/notifications/read-all`, {}, {
-                withCredentials: true,
-            });
-            // Update local state immediately for responsiveness
-            setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
-            // Sync with server to be sure
-            await fetchNotifications();
-            await onMarkAsRead();
-        } catch (error) {
-            console.error('Error marking all notifications as read:', error);
-        }
-    };
+  return (
+    <div
+      role="region"
+      aria-label="Notifications"
+      className="absolute right-0 z-50 mt-1 w-80 rounded border border-line bg-surface shadow-overlay"
+    >
+      <div className="flex items-center justify-between border-b border-line px-3 py-2">
+        <p className="text-label font-semibold text-ink">
+          Notifications
+          {unread > 0 && <span className="tabular text-ink-faint"> · {unread} unread</span>}
+        </p>
+        {unread > 0 && (
+          <Button variant="ghost" size="sm" onClick={markAll}>
+            Mark all read
+          </Button>
+        )}
+      </div>
 
-    const handleNotificationClick = async (notification) => {
-        if (!notification.isRead) {
-            await handleMarkAsRead(notification._id);
-        }
-
-        // Navigate based on notification type
-        switch (notification.type) {
-            case 'request_received':
-                navigate('/incoming-request', { state: { roomId: notification.roomId } });
-                break;
-            case 'request_accepted':
-                navigate('/rentersMyRoom');
-                break;
-            case 'request_rejected':
-                navigate('/findRooms');
-                break;
-            case 'request_withdrawn':
-                // Stay on current page or navigate to a general page
-                // navigate('/landowner-rooms'); // Optional: redirect if needed
-                break;
-            case 'rent_paid':
-                navigate('/my-renters');
-                break;
-            default:
-                break;
-        }
-
-        onClose();
-    };
-
-    const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diff = now - date;
-        const minutes = Math.floor(diff / 60000);
-        const hours = Math.floor(diff / 3600000);
-        const days = Math.floor(diff / 86400000);
-
-        if (minutes < 60) return `${minutes}m ago`;
-        if (hours < 24) return `${hours}h ago`;
-        return `${days}d ago`;
-    };
-
-    return (
-        <div
-            ref={dropdownRef}
-            className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl z-50 border border-gray-200 overflow-hidden"
-        >
-            <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                <h3 className="font-semibold text-gray-800">Notifications</h3>
-                <div className="flex gap-2">
-                    <button
-                        onClick={handleMarkAllAsRead}
-                        className="text-xs text-primary-600 hover:text-primary-700 font-medium"
-                        title="Mark all as read"
-                    >
-                        Mark all read
-                    </button>
-                    <button
-                        onClick={onClose}
-                        className="text-gray-400 hover:text-gray-600"
-                    >
-                        <FaTimes />
-                    </button>
-                </div>
-            </div>
-
-            <div className="max-h-96 overflow-y-auto">
-                {loading ? (
-                    <div className="p-4 text-center text-gray-500">Loading...</div>
-                ) : notifications.length === 0 ? (
-                    <div className="p-8 text-center text-gray-500">
-                        <p>No notifications yet</p>
-                    </div>
-                ) : (
-                    <div className="divide-y divide-gray-100">
-                        {notifications.map((notification) => (
-                            <div
-                                key={notification._id}
-                                onClick={() => handleNotificationClick(notification)}
-                                className={`p-4 hover:bg-gray-50 transition-colors cursor-pointer ${!notification.isRead ? 'bg-blue-50/50' : ''
-                                    }`}
-                            >
-                                <div className="flex gap-3">
-                                    <div className="flex-1">
-                                        <p className={`text-sm ${!notification.isRead ? 'font-semibold text-gray-800' : 'text-gray-600'}`}>
-                                            {notification.message}
-                                        </p>
-                                        <p className="text-xs text-gray-400 mt-1">
-                                            {formatDate(notification.createdAt)}
-                                        </p>
-                                    </div>
-                                    {!notification.isRead && (
-                                        <div className="flex-shrink-0 self-center">
-                                            <div className="w-2 h-2 bg-primary-600 rounded-full"></div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
-        </div>
-    );
-};
-
-export default NotificationDropdown;
+      <div className="max-h-80 overflow-y-auto">
+        {loading ? (
+          <SkeletonRows rows={3} cols={1} />
+        ) : error ? (
+          <p role="alert" className="px-3 py-6 text-center text-body text-danger">
+            {error}
+          </p>
+        ) : notifications.length === 0 ? (
+          <p className="px-3 py-8 text-center text-body text-ink-faint">
+            Nothing yet. You&rsquo;ll hear from us when someone applies to a room or pays
+            their rent.
+          </p>
+        ) : (
+          <ul className="divide-y divide-line">
+            {notifications.map((n) => (
+              <li key={n._id}>
+                <button
+                  type="button"
+                  onClick={() => open(n)}
+                  className={[
+                    "flex w-full items-start gap-2.5 px-3 py-2.5 text-left transition-colors hover:bg-surface-raised",
+                    !n.isRead && "bg-accent-soft",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
+                  <span
+                    aria-hidden="true"
+                    className={[
+                      "mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full",
+                      n.isRead ? "bg-transparent" : "bg-accent",
+                    ].join(" ")}
+                  />
+                  <span className="min-w-0">
+                    <span className="block text-body text-ink">{n.message}</span>
+                    <span className="mt-0.5 block text-label text-ink-faint">
+                      {dateTime(n.createdAt)}
+                      {!n.isRead && <span className="sr-only"> — unread</span>}
+                    </span>
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}

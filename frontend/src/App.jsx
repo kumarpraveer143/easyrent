@@ -28,12 +28,10 @@ const Layout = React.lazy(() => import("./components/layouts/Layout"));
 const ArchievedRenters = React.lazy(() =>
   import("./pages/landownerPages/ArchievedRenters")
 );
-const NoRenters = React.lazy(() => import("./pages/landownerPages/NoRenters"));
 const AddRent = React.lazy(() => import("./pages/landownerPages/AddRent"));
 const CheckHistory = React.lazy(() =>
   import("./pages/landownerPages/CheckHistory")
 );
-const NoHistory = React.lazy(() => import("./pages/landownerPages/NoHistory"));
 
 const ProtectedRoute = React.lazy(() =>
   import("./components/Auth/ProtectedRoute")
@@ -62,17 +60,15 @@ const PaymentHistory = React.lazy(() =>
 const MyRenters = React.lazy(() => import("./pages/landownerPages/MyRenters"));
 
 import AxiosInterceptor from "./components/AxiosInterceptor";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 const App = () => {
   return (
     <BrowserRouter>
+      <ErrorBoundary>
       <AxiosInterceptor />
       <Suspense
-        fallback={
-          <div className="font-sans bg-gray-900 text-white min-h-screen flex items-center justify-center">
-            <Loading />
-          </div>
-        }
+        fallback={<Loading />}
       >
         <Routes>
           {/* Open Routes for all */}
@@ -117,14 +113,12 @@ const App = () => {
                 <Route path="/landowner-rooms" element={<LandOwnerRooms />} />
                 <Route path="/my-renters" element={<MyRenters />} />
                 <Route path="/add-rent/:relationId" element={<AddRent />} />
-                <Route path="/no-history" element={<NoHistory />} />
                 <Route
                   path="/check-history/:relationId"
                   element={<CheckHistory />}
                 />
                 <Route path="/incoming-request" element={<IncommingRequest />} />
                 <Route path="/archieved-renters" element={<ArchievedRenters />} />
-                <Route path="/no-renters" element={<NoRenters />} />
               </Route>
 
               {/* Protected Routes for all users  */}
@@ -139,6 +133,7 @@ const App = () => {
           </Route>
         </Routes>
       </Suspense>
+      </ErrorBoundary>
       <ToastContainer
         position="top-center"
         autoClose={3000}

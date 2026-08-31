@@ -1,7 +1,4 @@
-import mongoose from "mongoose";
-import favouriteSchema from "./favourite.schema.js";
-
-const favouriteModel = mongoose.model("Favourite", favouriteSchema);
+import { Favourite as favouriteModel } from "../../models/index.js";
 
 class FavouriteRepository {
   async addFavoutieRoom(userId, roomId) {

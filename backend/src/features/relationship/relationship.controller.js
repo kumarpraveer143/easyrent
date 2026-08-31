@@ -195,10 +195,11 @@ class RelationshipController {
   }
 
   async getRoomDetailsByRenterId(req, res) {
-    let { userId } = req.cookies;
+    const userId = req.userId;
     try {
       const room = await this.relaltionshipRepository.getRoomDetails(userId);
-      return res.status(200).json({ success: true, room: room });
+      // No active tenancy is a normal state, not an error.
+      return res.status(200).json({ success: true, room: room ?? null });
     } catch (err) {
       console.log(err);
       return res.status(500).json({
@@ -209,7 +210,7 @@ class RelationshipController {
   }
 
   async getHistoryOfRenter(req, res) {
-    let { userId } = req.cookies;
+    const userId = req.userId;
     try {
       const histories = await this.relaltionshipRepository.getHistoriesOfRenter(
         userId
@@ -226,7 +227,7 @@ class RelationshipController {
 
   //this is being searched by the renters side
   async engaged(req, res) {
-    let { userId } = req.cookies;
+    const userId = req.userId;
     try {
       const findRenterId = await this.relaltionshipRepository.isEngaged(userId);
       if (findRenterId) {
@@ -245,8 +246,8 @@ class RelationshipController {
 
   //this is being use by the landowner side
   async isArchieve(req, res) {
-    let { userId } = req.cookies;
-    let { relationId } = req.body;
+    const userId = req.userId;
+    const { relationId } = req.body;
     try {
       const findRenterId = await this.relaltionshipRepository.isArchieve(
         userId,

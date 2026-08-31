@@ -4,6 +4,7 @@ import HistoryRepository from '../history/history.repository.js';
 import NotificationRepository from '../notification/notification.repository.js';
 import UserRepository from '../users/user.repository.js';
 import RoomRepository from '../rooms/room.repository.js';
+import { History, Relationship, Room } from '../../models/index.js';
 
 class PaymentController {
     constructor() {
@@ -14,254 +15,213 @@ class PaymentController {
         this.roomRepository = new RoomRepository();
     }
 
-    // Create Stripe Checkout Session
+    /**
+     * SEC-04: `amount`, `renterId`, `ownerId` and `roomId` all used to come
+     * from `req.body`, validated only as `amount > 0`. Nothing checked the
+     * caller was the tenant, and nothing compared the amount to the room's
+     * actual rent — so a tenant could pay Rs1 against a Rs15,000 room and the
+     * ledger recorded a completed rent payment.
+     *
+     * Now the request carries only `relationId`. Everything else is looked up.
+     */
     async createCheckoutSession(req, res) {
         try {
-            const { relationId, amount, renterId, ownerId, roomId } = req.body;
+            const { relationId } = req.body;
 
-            // Validate amount
-            if (!amount || amount <= 0) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Invalid payment amount'
-                });
+            const relationship = await Relationship.findById(relationId);
+            if (!relationship) {
+                return res.status(404).json({ success: false, message: 'Tenancy not found.' });
             }
 
-            // Get frontend URL from env or fallback to origin
+            // Only the tenant pays their own rent.
+            if (relationship.renterId?.toString() !== req.userId) {
+                return res.status(404).json({ success: false, message: 'Tenancy not found.' });
+            }
+
+            if (relationship.status !== 'active') {
+                return res
+                    .status(409)
+                    .json({ success: false, message: 'That tenancy is no longer active.' });
+            }
+
+            const room = await Room.findById(relationship.roomId);
+            if (!room) {
+                return res.status(409).json({ success: false, message: 'That room no longer exists.' });
+            }
+
+            // THE amount. Derived, never supplied.
+            const amount = Number(room.rentPrice);
+            if (!Number.isFinite(amount) || amount <= 0) {
+                return res
+                    .status(409)
+                    .json({ success: false, message: 'This room has no rent set. Ask your landlord to fix it.' });
+            }
+
             const frontendUrl = process.env.FRONTEND_URL || req.headers.origin || 'http://localhost:5173';
 
-            // Create checkout session
-            const session = await stripe.checkout.sessions.create({
-                payment_method_types: ['card'],
-                line_items: [
-                    {
-                        price_data: {
-                            currency: 'inr',
-                            product_data: {
-                                name: 'Rent Payment',
-                                description: `Monthly rent payment for room`,
+            const session = await stripe.checkout.sessions.create(
+                {
+                    payment_method_types: ['card'],
+                    line_items: [
+                        {
+                            price_data: {
+                                currency: 'inr',
+                                product_data: {
+                                    name: `Rent — room ${room.roomNumber ?? ''}`.trim(),
+                                    description: 'Monthly rent payment',
+                                },
+                                unit_amount: Math.round(amount * 100), // paise
                             },
-                            unit_amount: Math.round(amount * 100), // Convert to paise
+                            quantity: 1,
                         },
-                        quantity: 1,
+                    ],
+                    mode: 'payment',
+                    success_url: `${frontendUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+                    cancel_url: `${frontendUrl}/payment-cancelled`,
+                    metadata: {
+                        relationId: relationship._id.toString(),
+                        renterId: relationship.renterId.toString(),
+                        ownerId: relationship.ownerId.toString(),
+                        roomId: room._id.toString(),
+                        amount: String(amount),
                     },
-                ],
-                mode: 'payment',
-                success_url: `${frontendUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-                cancel_url: `${frontendUrl}/payment-cancelled`,
-                metadata: {
-                    relationId: relationId.toString(),
-                    renterId: renterId.toString(),
-                    ownerId: ownerId.toString(),
-                    roomId: roomId.toString(),
-                    amount: amount.toString(),
                 },
-            });
+                // Two clicks on "Pay" must not create two checkout sessions.
+                { idempotencyKey: `checkout:${relationId}:${new Date().toISOString().slice(0, 10)}` }
+            );
 
-            return res.status(200).json({
-                success: true,
-                sessionId: session.id,
-                url: session.url
-            });
+            return res.status(200).json({ success: true, sessionId: session.id, url: session.url });
         } catch (error) {
             console.error('Stripe checkout session error:', error);
-            return res.status(500).json({
+            return res.status(502).json({
                 success: false,
-                message: 'Failed to create payment session',
-                error: error.message
+                message: "We couldn't start the payment. Try again in a moment.",
             });
         }
     }
 
-    // Verify payment session
+    /**
+     * SEC-05: this used to CREATE a History row, and so did the webhook — for
+     * the same session, with no idempotency key and no unique index. Every
+     * online payment was recorded twice, or once, depending on webhook timing.
+     *
+     * The webhook is now the single writer. This endpoint only reports status,
+     * and only to the tenant who owns the session.
+     */
     async verifyPayment(req, res) {
         try {
             const { sessionId } = req.params;
-
             const session = await stripe.checkout.sessions.retrieve(sessionId);
 
-            if (session.payment_status === 'paid') {
-                // Check if history already exists to prevent duplicates
-                // Note: In a production environment, you should use idempotency keys or check DB more robustly
-                // For now, we'll rely on the fact that the user is redirected here once.
-                // Ideally, the webhook handles the creation, but this is a fallback/confirmation for the UI.
-
-                // We will just return the session details and let the frontend show success.
-                // The actual recording should ideally happen via webhook to be secure and reliable.
-                // However, for immediate feedback, we can check if it's recorded or record it if missing.
-
-                // For this implementation, we'll return the session info.
-                // The webhook will handle the DB insertion to avoid duplication.
-                // OR we can insert here if not exists.
-
-                // Let's check if a history with this stripeSessionId exists
-                // We need to update HistoryRepository or use Mongoose model directly here?
-                // Accessing model via repository is better.
-
-                // Since we don't have a method to find by stripeSessionId in HistoryRepository yet,
-                // we might want to add it or just rely on the webhook.
-                // But the guide said: "Create history record" in verifyPayment.
-                // Let's follow the guide but be careful about duplicates if webhook also runs.
-                // A common pattern is: Webhook does the work. verifyPayment just checks status.
-                // But if webhook is delayed, verifyPayment might need to do it.
-
-                // Let's stick to the guide's code for now, which creates it.
-                // To prevent duplicates, we should probably check if it exists.
-
-                // I'll modify the guide's code slightly to check for existence if I can, 
-                // or just implement as is and assume the user will handle potential dupes or 
-                // we can add a unique index on stripeSessionId in the schema.
-
-                const historyObj = {
-                    relationId: session.metadata.relationId,
-                    rentPaid: parseFloat(session.metadata.amount),
-                    date: new Date(),
-                    paymentMethod: 'Online',
-                    remarks: `Stripe Payment ID: ${session.payment_intent}`,
-                    stripeSessionId: sessionId,
-                    stripePaymentIntentId: session.payment_intent
-                };
-
-                // We'll try to create it. If it's a duplicate (enforced by schema unique index later), it might fail.
-                // For now, let's just create it.
-                const history = await this.historyRepository.createHistory(historyObj);
-
-                // Create Notification for Landowner
-                try {
-                    const renter = await this.userRepository.getUserById(session.metadata.renterId);
-                    const room = await this.roomRepository.getRoomById(session.metadata.roomId);
-
-                    if (renter && room) {
-                        await this.notificationRepository.createNotification({
-                            userId: session.metadata.ownerId,
-                            type: 'rent_paid',
-                            message: `${renter.name} paid you the rent.`,
-                            roomId: session.metadata.roomId,
-                            roomNumber: room.roomNumber.toString()
-                        });
-                    }
-                } catch (notifError) {
-                    console.error('Failed to create notification:', notifError);
-                }
-
-                return res.status(200).json({
-                    success: true,
-                    paid: true,
-                    history,
-                    session
-                });
+            // Don't leak another person's Stripe session (customer email,
+            // address, amounts) to any signed-in caller.
+            if (session.metadata?.renterId !== req.userId) {
+                return res.status(404).json({ success: false, message: 'Payment not found.' });
             }
+
+            const paid = session.payment_status === 'paid';
+            const recorded = paid
+                ? await History.findOne({ stripeSessionId: sessionId }).lean()
+                : null;
 
             return res.status(200).json({
                 success: true,
-                paid: false,
-                status: session.payment_status
+                paid,
+                status: session.payment_status,
+                // `recorded` is null for the short window before the webhook
+                // lands; the client shows "confirming" rather than failing.
+                recorded: recorded ? { _id: recorded._id, rentPaid: recorded.rentPaid, date: recorded.date } : null,
             });
         } catch (error) {
             console.error('Payment verification error:', error);
-            return res.status(500).json({
-                success: false,
-                message: 'Failed to verify payment',
-                error: error.message
-            });
+            return res.status(502).json({ success: false, message: "Couldn't verify that payment." });
         }
     }
 
-    // Webhook handler for Stripe events
+    /** The ONLY writer of online payment history. */
     async handleWebhook(req, res) {
         const sig = req.headers['stripe-signature'];
         let event;
 
         try {
-            event = stripe.webhooks.constructEvent(
-                req.body,
-                sig,
-                process.env.STRIPE_WEBHOOK_SECRET
-            );
+            event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
         } catch (err) {
             console.error('Webhook signature verification failed:', err.message);
             return res.status(400).send(`Webhook Error: ${err.message}`);
         }
 
-        // Handle the event
-        switch (event.type) {
-            case 'checkout.session.completed':
+        try {
+            if (event.type === 'checkout.session.completed') {
                 const session = event.data.object;
-
-                // Create payment history
                 if (session.payment_status === 'paid') {
-                    const historyObj = {
-                        relationId: session.metadata.relationId,
-                        rentPaid: parseFloat(session.metadata.amount),
-                        date: new Date(),
-                        paymentMethod: 'Online',
-                        remarks: `Stripe Payment - Session: ${session.id}`,
-                        stripeSessionId: session.id,
-                        stripePaymentIntentId: session.payment_intent
-                    };
-
-                    // We should check if it already exists to avoid double counting if verifyPayment also added it
-                    // But for now, I'll just implement the creation.
-                    // In a real app, we'd use a unique constraint on stripeSessionId.
-
-                    await this.historyRepository.createHistory(historyObj);
-
-                    // Create Notification for Landowner
-                    try {
-                        const renter = await this.userRepository.getUserById(session.metadata.renterId);
-                        const room = await this.roomRepository.getRoomById(session.metadata.roomId);
-
-                        if (renter && room) {
-                            await this.notificationRepository.createNotification({
-                                userId: session.metadata.ownerId,
-                                type: 'rent_paid',
-                                message: `${renter.name} paid you the rent.`,
-                                roomId: session.metadata.roomId,
-                                roomNumber: room.roomNumber.toString()
-                            });
-                        }
-                    } catch (notifError) {
-                        console.error('Failed to create notification in webhook:', notifError);
-                    }
-
-                    console.log('Payment successful, history created via webhook');
+                    await this.recordPayment(session);
                 }
-                break;
-
-            case 'payment_intent.succeeded':
-                const paymentIntent = event.data.object;
-                console.log('PaymentIntent was successful!', paymentIntent.id);
-                break;
-
-            case 'payment_intent.payment_failed':
-                const failedPayment = event.data.object;
-                console.log('PaymentIntent failed:', failedPayment.id);
-                break;
-
-            default:
-                console.log(`Unhandled event type ${event.type}`);
+            }
+        } catch (err) {
+            // Returning 500 makes Stripe retry, which is what we want for a
+            // transient failure — the unique index makes the retry safe.
+            console.error('Webhook handling failed:', err);
+            return res.status(500).json({ received: false });
         }
 
         res.json({ received: true });
     }
 
-    // Get payment history for a user
+    async recordPayment(session) {
+        const { relationId, renterId, ownerId, roomId, amount } = session.metadata ?? {};
+        if (!relationId) return;
+
+        // Idempotent by construction: stripeSessionId carries a unique index,
+        // so a Stripe retry updates the same row instead of adding a second.
+        const result = await History.findOneAndUpdate(
+            { stripeSessionId: session.id },
+            {
+                $setOnInsert: {
+                    relationId,
+                    rentPaid: Number(amount),
+                    date: new Date(),
+                    paymentMethod: 'Online',
+                    remarks: `Stripe session ${session.id}`,
+                    stripeSessionId: session.id,
+                    stripePaymentIntentId: session.payment_intent,
+                    paymentStatus: 'completed',
+                },
+            },
+            { upsert: true, new: true, rawResult: true }
+        );
+
+        // Only notify on the FIRST insert, or a Stripe retry re-notifies.
+        const wasInserted = result?.lastErrorObject?.upserted != null;
+        if (!wasInserted) return;
+
+        try {
+            const renter = await this.userRepository.getUserById(renterId);
+            const room = await this.roomRepository.getRoomById(roomId);
+            if (renter && room) {
+                await this.notificationRepository.createNotification({
+                    userId: ownerId,
+                    type: 'rent_paid',
+                    message: `${renter.name} paid the rent.`,
+                    roomId,
+                    roomNumber: String(room.roomNumber ?? 'N/A'),
+                });
+            }
+        } catch (notifError) {
+            // A missing notification must not fail the payment record.
+            console.error('Failed to create payment notification:', notifError);
+        }
+    }
+
+    /** Payments across every tenancy the signed-in user is party to. */
     async getPaymentHistory(req, res) {
         try {
-            const { userId } = req.params;
-            const payments = await this.paymentRepository.getPaymentsByUser(userId);
-
-            return res.status(200).json({
-                success: true,
-                payments
-            });
+            // The route used to take :userId from the URL with no check that it
+            // was you. It is now always the session user.
+            const payments = await this.paymentRepository.getPaymentsByUser(req.userId);
+            return res.status(200).json({ success: true, payments });
         } catch (error) {
             console.error('Get payment history error:', error);
-            return res.status(500).json({
-                success: false,
-                message: 'Failed to retrieve payment history',
-                error: error.message
-            });
+            return res.status(500).json({ success: false, message: "Couldn't load payments." });
         }
     }
 }

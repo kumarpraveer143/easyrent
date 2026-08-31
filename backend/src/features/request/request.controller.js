@@ -2,6 +2,7 @@ import RequestRepository from "./request.respository.js";
 import NotificationRepository from "../notification/notification.repository.js";
 import UserRepository from "../users/user.repository.js";
 import { emitToUser } from "../../config/socket.config.js";
+import { applicantUser } from "../users/user.controller.js";
 
 class RequestController {
   constructor() {
@@ -92,7 +93,10 @@ class RequestController {
     const roomId = req.params.id;
     try {
       const user = await this.requestRespoitory.getUser(roomId);
-      const extractedUser = user.map((u) => u.renterId);
+      // SEC-09: this used to return the fully populated User document for
+      // every applicant — Aadhaar number, date of birth and home address
+      // included — to any landowner.
+      const extractedUser = user.map((u) => applicantUser(u.renterId));
       return res.status(200).json({ success: true, users: extractedUser });
     } catch (err) {
       console.log(err);

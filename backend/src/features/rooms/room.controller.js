@@ -23,8 +23,18 @@ export default class RoomController {
 
   //registerRoom Controller
   async registerRoom(req, res) {
-    const roomObj = req.body;
-    roomObj.owner = req.cookies.userId;
+    // Owner comes from the SIGNED session, never a client-settable cookie.
+    const { roomNumber, address, rentPrice, roomType, numberOfRooms, numberOfBathrooms } =
+      req.body;
+    const roomObj = {
+      roomNumber,
+      address,
+      rentPrice,
+      roomType,
+      numberOfRooms,
+      numberOfBathrooms,
+      owner: req.userId,
+    };
     try {
       const result = await this.roomRepository.registerRoom(roomObj);
       res.json({ success: true, room: result });
@@ -53,8 +63,7 @@ export default class RoomController {
 
   //get room by owner id
   async getRoomsByOwnerId(req, res) {
-    const ownerId = req.cookies.userId;
-    // console.log(ownerId);
+    const ownerId = req.userId;
     try {
       const rooms = await this.roomRepository.getRoomsByOwnerId(ownerId);
       res.status(200).json({ success: true, message: rooms });
@@ -95,7 +104,7 @@ export default class RoomController {
     const roomId = req.params.id;
     const roomObj = req.body;
     try {
-      const room = await this.roomRepository.getRoomById(roomId);
+      const room = req.room ?? (await this.roomRepository.getRoomById(roomId));
 
       if (!room) {
         return res
@@ -103,7 +112,17 @@ export default class RoomController {
           .json({ success: false, message: "Room not found" });
       }
 
-      Object.assign(room, roomObj);
+      // Whitelist: `owner` and `isAvailable` are not client-editable here.
+      const { roomNumber, address, rentPrice, roomType, numberOfRooms, numberOfBathrooms } =
+        roomObj;
+      Object.assign(room, {
+        ...(roomNumber !== undefined && { roomNumber }),
+        ...(address !== undefined && { address }),
+        ...(rentPrice !== undefined && { rentPrice }),
+        ...(roomType !== undefined && { roomType }),
+        ...(numberOfRooms !== undefined && { numberOfRooms }),
+        ...(numberOfBathrooms !== undefined && { numberOfBathrooms }),
+      });
       await room.save();
       return res.json({ success: true, message: room });
     } catch (err) {
@@ -119,7 +138,10 @@ export default class RoomController {
   async toggleRoomAssign(req, res) {
     const roomId = req.params.roomId;
     try {
-      let room = await this.roomRepository.getRoomById(roomId);
+      const room = req.room ?? (await this.roomRepository.getRoomById(roomId));
+      if (!room) {
+        return res.status(404).json({ success: false, message: "Room not found" });
+      }
       room.isAvailable = !room.isAvailable;
       await room.save();
       return res.json({ success: true, message: "Room is toggled!" });
